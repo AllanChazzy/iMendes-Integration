@@ -1,9 +1,12 @@
-Requisitos - Integração Consulta Tributária Ganso iMendes
+# Requisitos - Integração Consulta Tributária Ganso iMendes
 ---
-# Sumario
-- [Sumario](#sumario)
+# Sumário
+- [Sumário](#sumário)
 - [Introdução](#introdução)
 - [Requisitos Iniciais](#requisitos-iniciais)
+  - [Cadastro de Empresas](#cadastro-de-empresas)
+  - [Parâmetros do Sistema](#parâmetros-do-sistema)
+  - [Exemplo de Tela de Configurações e Parâmetros:](#exemplo-de-tela-de-configurações-e-parâmetros)
 - [Requisitos Específicos](#requisitos-específicos)
   - [Consulta Tributos - Cadastro de Produtos](#consulta-tributos---cadastro-de-produtos)
     - [Fluxo de Consulta](#fluxo-de-consulta)
@@ -21,30 +24,36 @@ Requisitos - Integração Consulta Tributária Ganso iMendes
 
 # Requisitos Iniciais
 Nesta seção, serão descritos os requisitos iniciais e obrigatórios para a continuidade do processo de integração, e descreve os principais parâmetros de Configuração. 
-- Para o correto funcionamento das Requisições à API iMendes, dados do Emitente da Consulta são necessários e a maioria deles estão disponíveis no Cadastro de Empresa e nos Parâmetros do Sistema Ganso. Contudo, há necessidade em criar Estrutura para as seguintes informações abaixo:
-  1. (RI 1) Em **Cadastro de Empresas** (``Arquivos >> Empresa >> Empresa``), deverá existir um campo denominado **Regime Tributário** que corresponde a subclassificação do CRT **3 - Regime Normal** contendo as opções de **Lucro Real - LR** e **Lucro Presumido - LP**.
-     1. Esta opção deve ser habilitada apenas se o CRT configurado for igual a 3.
-     2. Esta informação é obrigatória ao enviar a requisição JSON e afeta o resultado das informações tributárias que a API retornará. Deste modo, não poderá ser fixa.
-  2. (RI 2) Em **Parâmetros do Sistema** em uma Aba específica denominada **iMendes**, deverá existir campos para Configuração do acesso às APIs de **Saneamento e Envia/Recebe Dados**, que são:
-     - (RI 2.1) Um parâmetro para **Ativar Integração de Consulta Tributária iMendes**.
-     - (RI 2.2) Um Grupo **Configurações** contendo:
-        1. **URL API Saneamento:** Link para acesso à Consulta Tributária, tipo texto com tamanho 255.
-        2. **URL API Envia/Recebe Dados:** Link para acesso aos Métodos Específicos que serão descritos posteriormente, tipo texto com tamanho 255.
-        3. **Senha:** Senha do parceiro integrado. Esta senha é fornecida pela iMendes, e possui padrão case sensitive. Não foi informado o tamanho máximo e as limitações, portanto, utilizar o tipo texto com tamanho de 20 caracteres sem validações.
-        4. **Versão**: Versão da API contratada pelo Cliente, que deve ser definida entre as opções v2.0 e v3.0. Esta configuração deve ser discutida melhor estratégia para evitar que o Usuário selecione uma versão não contrada.
-        5. **Tempo de Sincronia**: em segundos, que representa o tempo limite para receber a resposta da API. O valor padrão é 15 segundos, contudo, algumas rotinas poderão levar até 20 segundos para obter resposta. Além deste fator, o valor servirá para ajustar tempos em conexões lentas.
-        6. Um Botão para verificar a disponibilidade da API, e principalmente, validar a senha informada nas configurações.
-     - (RI 2.3) Um Grupo **Comportamento**: contendo Configurações da Automatização dos Processos:
-        1. [x] Atualizar Tributos dos Produtos Automaticamente. 
-        2. [x] Atualizar Grade Fiscal Ganso com Informações de Entrada
-        3. [x] Permitir Consultar Tributos através do Cadastro de Produtos
-        4. [x] Permitir Vincular Produtos utilizando Código iMendes
-        5. [x] Verificar alterações de Produtos em: [   ] dias.
-       - Exemplo de Tela de Configurações e Parâmetros: 
-          - ![Exemplo de Parâmetros](./parametros.png)
-  3. (RI 3) A Requisição iMendes requer que seja enviada uma **Operação** válida para obter o retorno com Dados Tributários. É necessária vinculação do CFOP com determinadas operações como Venda e Entrada. Por exemplo:
-     - Ao realizar a consulta via Cadastro de Produtos, entende-se que o Usuário deseja atualizar informações tributárias de Saída (Venda), portanto, deve ser enviado o CFOP 5102, na requisição JSON. Mesmo que o CFOP enviado não seja o correto para a Operação, a API retornará o CFOP correto e os demais dados, inclusive, alguns de Entrada.
-     - Operações de Entrada e algumas movimentações de Saída como Transferência e Devoluções, são mais abrangentes, e requerem que seja informado um CFOP coerente com a Operação. Por exemplo, para operações de Transferência, informar o CFOP 5152, e a API retornará o CFOP correto para a operação com o respectivo produto.
+- Para o correto funcionamento das Requisições à API iMendes, dados do Emitente da Consulta são necessários e a maioria deles estão disponíveis no Cadastro de Empresa e nos Parâmetros do Sistema Ganso. Contudo, há necessidade em criar Estruturas para as seguintes informações abaixo:
+
+## Cadastro de Empresas
+
+Tipo | Rotina/Recurso | Descritivo
+:------|:------|:------
+**Caixa de Combinação** | Regime Tributário | Campo para informar a Subclassificação do CRT que pode ser definida entre **Lucro Real - LR** ou **Lucro Presumido - LP**. Deve ser ativado apenas se o CRT selecionado for igual a 3. *Informação obrigatória para envio da requisição*
+
+## Parâmetros do Sistema
+Tipo de Elemento | Pai | Nome/Texto | Descritivo
+:----------- | :------ |:------ |:------
+**Caixa de Seleção** | - | Ativar Integração de Consulta Tributária iMendes | Parâmetro Global para ativação das configurações da API
+**Grupo** | - | URLs da API | Organiza os campos de Configuração necessários para conectividade com o Servidor.
+**Campo Texto** | **URLs da API** | Saneamento (Consulta Tributação) | Campo para infomrar a URL da API que retorna Dados da Tributação do produto consultado. Tamanho máximo de 255 caracteres
+**Campo Texto** | **URLs da API** | Envia e Recebe Dados (Outros Métodos) | Campo para informar a URL da API que recebe os comandos extras e retorna produtos alterados. Tamanho máximo de 255 caracteres
+**Campo Texto Mascarado** | **URLs da API** | Senha | Campo para Senha do Usuário Integrado. Tamanho máximo de 20 caracteres, sem validações. 
+**Botão de Seleção** | **URLs da API** | Versão | Seleção da Versão da API contratada. Disponibilizar as versões 2.0 e 3.0 de seleção única (somente uma das opções pode ser selecionada)
+**Campo Texto** | **URLs da API** | Tempo de Resposta | Timeout ou Tempo de Resposta máximo da API. Deve ser numérico e interpretado como "segundos". Valor padrão: 15 segundos
+**Botão** | **URLs da API** | Verificar Status | Botão para verificação da Conectividade com as APIs. Deve retornar uma mensagem de Sucesso ou Falha, para ambas APIs.
+**Grupo** | - | **Comportamento** | Organiza os parâmetros que definem as regras de funcionamento da integração e automatismos.
+**Caixa de Seleção** | **Comportamento** | Atualizar Tributos dos Produtos Automaticamente | Permite atualização automatizada dos tributos de produtos ao consultar um Produto ou Receber atualizações em lote através do *Gerenciador Tributário*
+**Caixa de Seleção** | **Comportamento** | Atualizar Grade Fiscal Ganso com Informações de Entrada Consultadas | Permite criar Regras Fiscais Ganso através das informações tributárias coletadas em consultas.
+**Caixa de Seleção** | **Comportamento** | Permitir Consultar Tributos no Cadastro de Produtos | Permite ao usuário efetuar a consulta iMendes durante o Cadastramento de Novo Produto ou Atualização de um Produto Cadastrado.
+**Caixa de Seleção** | **Comportamento** | Permitir Vincular Produtos utilizando Código iMendes | Permite ao usuário vincular um Produto Cadastrado com um Produto iMendes Consultado por Descrição.
+**Caixa de Seleção** | **Comportamento** | Verificar Alterações de Produtos Automaticamente em: [ x ] dias. | Parâmetro para definir a periodicidade de consulta à atualizações de grades realizadas pelo iMendes. Deve ser numérico e interpretado como "dias". Valor padrão: 15 dias
+
+## Exemplo de Tela de Configurações e Parâmetros: 
+  
+  ![Exemplo de Parâmetros](./parametros.png) 
+
 
 [Voltar ao Sumário](#sumario)
 
