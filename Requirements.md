@@ -10,6 +10,9 @@
 - [Requisitos Específicos](#requisitos-específicos)
   - [Consulta Tributos - Cadastro de Produtos](#consulta-tributos---cadastro-de-produtos)
     - [Fluxo de Consulta](#fluxo-de-consulta)
+  - [Decrever em Etapas todos os Processos](#decrever-em-etapas-todos-os-processos)
+    - [Etapa 1 - Coleta de Dados](#etapa-1---coleta-de-dados)
+    - [Etapa 2 - Montagem da Requisição (revisar esse termo)](#etapa-2---montagem-da-requisição-revisar-esse-termo)
     - [Fluxograma da Consulta Tributação](#fluxograma-da-consulta-tributação)
   - [Consulta Tributos - Gerenciador de Tributação](#consulta-tributos---gerenciador-de-tributação)
     - [Métodos Básicos](#métodos-básicos)
@@ -70,6 +73,11 @@ Conforme documentação disponibilizada pela iMendes, uma boa prática é fornec
    1. Durante o Cadastramento de um Novo Produto;
    2. Durante o processo de Atualização de um Produto já Cadastrado.
 
+
+## Decrever em Etapas todos os Processos
+### Etapa 1 - Coleta de Dados
+### Etapa 2 - Montagem da Requisição (revisar esse termo)
+
 Analisando a Estrutura de envio de Requisição, um processo comum é executado e orientado conforme os seguintes passos:
   1. Prepara a Requisição JSON, utilizando os dados do Emitente, Perfil e Produto.
      1. O Perfil possui informações chave que são:
@@ -82,7 +90,7 @@ Analisando a Estrutura de envio de Requisição, um processo comum é executado 
            1. Se Código de Barras é um GTIN válido e não iniciar com 789 ou 790, em Perfil, enviar "origem" igual a 8.
         2. **Apenas Descrição (Método Consulta Produtos iMendes)**. Quando produto não possuir Código de Barras EAN/GTIN ou em branco, e não estiver vinculado a um Código iMendes. 
         3. **Código iMendes e Descrição**. Enviar o EAN/GTIN, Descrição e Código iMendes vinculado.
-   2. Realiza a Conexão com API
+   1. Realiza a Conexão com API
       1. Se método de consulta igual a 1 (Código de Barras e Descrição), enviar o Código de Barras e Descrição informados durante o Cadastramento.
       2. Se método de consulta igual a 2 (Apenas descrição), utilizar o método "Produtos iMendes" enviando apenas a descrição informada pelo Usuário.
          1. Fornecer ao Usuário um meio de selecionar um Produto localizado pela Descrição (em uma lista), e permitir vinculá-lo ao seu Cadastro utilizando o Código iMendes. O usuário poderá vincular apenas 1 Código iMendes por Produto cadastrado.
