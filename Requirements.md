@@ -32,9 +32,9 @@ Nesta seção, serão descritos os **Requisitos Iniciais e Obrigatórios** para 
 
 ## Cadastro de Empresas
 
-Tipo | Rotina/Recurso | Descritivo
-:------|:------|:------
-**Caixa de Combinação** | Regime Tributário | Campo para informar a Subclassificação do CRT que pode ser definida entre **Lucro Real - LR** ou **Lucro Presumido - LP**. Deve ser ativado apenas se o CRT selecionado for igual a 3. *Informação obrigatória para envio da requisição*
+Tipo | Rotina/Recurso | Descritivo | Validações | Obrigatório
+:------|:------|:------|:-------|:-----:
+**Caixa de Combinação** | Regime Tributário | Campo para informar a Subclassificação do CRT que pode ser definida entre **Lucro Real - LR** ou **Lucro Presumido - LP**. | Deve ser ativado apenas se o CRT selecionado for igual a 3. | **Sim**
 
 ## Parâmetros do Sistema
 Tipo de Elemento | Pai | Nome/Texto | Descritivo
@@ -98,12 +98,12 @@ Método | Tipo | Descritivo | Validações | API | Tags de Envio Principais
 **Método 2** |**Apenas Descrição** | Consultar a Tributação de um Produto utilizando a Descrição. Capturar a lista de Produtos semelhantes, e permitir vincular um Produto iMendes com o Produto corrente. | Permitir vincular apenas um Produto iMendes com um Produto cadastrado. Criar acesso restrito para esta operação. Identificar se o Produto está sem Código de Barras e não vinculado a um Código iMendes.|**Envia/Recebe Dados**|"nomeservico":"DESCPRODUTOS", "dados":"CNPJ|DESCRICAO"
 **Método 3** | **Código iMendes e Descrição** | Consultar a Tributação do Produto utilizando o Código iMendes previamente vinculado. Capturar o retorno normalmente como ocorre no Método 1 | Identificar se o Produto possui um Código iMendes, se sim, utilizar esta informação para localizar a tributação. | **Saneamento** | "codIMendes":"CODIGOVINCULADO", "descricao":"DESCRICAO"
 
-Além do Método de Consulta, outras informações são necessárias para envio da Requisição, que compõem o **Perfil** a ser consultado. Estas informações foram classificadas e organizadas, e mesmo não obrigatórias, devem ser enviadas com valores padrão. São:
+Além do Método de Consulta, outras informações são necessárias para envio da Requisição, que compõem o **Perfil** a ser consultado. Estas informações foram classificadas e organizadas, e mesmo as não obrigatórias, devem ser enviadas com valores padrão. São:
 
 Dado | Tipo | Descritivo | Obrigatório
-:------|:------|:------|:-----
-UF | Lista de Dados | Lista de UFs para Consulta de Regras. Para Operações de Venda enviar por padrão "5102" | **Sim**
-CFOP | Código da Operação | Código da Operação a ser Realizada. Deve ser enviada uma operação coerente com os dados desejados, por exemplo, uma Operação de Venda deve conter um CFOP que indique operação de Venda, mesmo que este não seja o correto | **Sim**
+:------|:------|:------|:-----:
+UF | Lista de Dados | Lista de UFs para Consulta de Regras. Por padrão enviar a UF da Empresa Filial | **Sim**
+CFOP | Código da Operação | Código da Operação a ser Realizada. Deve ser enviada uma operação coerente com os dados desejados, por exemplo, uma Operação de Venda deve conter um CFOP que indique operação de Venda, mesmo que este não seja o correto. Para Operações de Venda enviar por padrão "5102" | **Sim**
 Característica Tributária | Lista de Códigos Inteiros | Indica o Tipo de Destinatário da Operação | **Sim**
 Finalidade | Código | Indica a Destinação do Produto para a Operação informada. É importante para especificar a operação. | Não
 Simples Nacional | Caractere | Indica se o Destinatário da Operação é Simples Nacional ou Não. Preenchido com 'S' ou 'N'. Se CRT da Empresa é igual a 1 ou 2, enviar 'S', senão enviar 'N'. | Não
