@@ -13,7 +13,6 @@
   - [Requisitos - Consulta iMendes Cadastro de Produtos](#requisitos---consulta-imendes-cadastro-de-produtos)
   - [Campos](#campos)
   - [Tipos de Consulta](#tipos-de-consulta)
-  - [Fluxograma da Consulta Tributação](#fluxograma-da-consulta-tributação)
   - [Consulta Tributos - Gerenciador de Tributação](#consulta-tributos---gerenciador-de-tributação)
     - [Métodos Básicos](#métodos-básicos)
     - [Métodos Avançados](#métodos-avançados)
@@ -98,20 +97,20 @@ Método | Tipo | Descritivo | Validações | API | Tags de Envio Principais
 **Método 2** |**Apenas Descrição** | Consultar a Tributação de um Produto utilizando a Descrição. Capturar a lista de Produtos semelhantes, e permitir vincular um Produto iMendes com o Produto corrente. | Permitir vincular apenas um Produto iMendes com um Produto cadastrado. Criar acesso restrito para esta operação. Identificar se o Produto está sem Código de Barras e não vinculado a um Código iMendes.|**Envia/Recebe Dados**|"nomeservico":"DESCPRODUTOS", "dados":"CNPJ|DESCRICAO"
 **Método 3** | **Código iMendes e Descrição** | Consultar a Tributação do Produto utilizando o Código iMendes previamente vinculado. Capturar o retorno normalmente como ocorre no Método 1 | Identificar se o Produto possui um Código iMendes, se sim, utilizar esta informação para localizar a tributação. | **Saneamento** | "codIMendes":"CODIGOVINCULADO", "descricao":"DESCRICAO"
 
-Além do Método de Consulta, outras informações são necessárias para envio da Requisição, que compõem o **Perfil** a ser consultado. Estas informações foram classificadas e organizadas, e mesmo as não obrigatórias, devem ser enviadas com valores padrão. São:
+Além do Método de Consulta, outras informações são necessárias para envio da Requisição, que compõem o **Perfil** a ser consultado. Estas informações foram classificadas e organizadas, e mesmo as não obrigatórias, devem ser enviadas com valores padrão. Conforme análise, o objetivo de Consulta através do Cadastro é obter dados para **Saída na Operação de Venda ao Consumidor (NFC-e)**, portanto os seguintes parâmetros devem ser considerados:
 
-Dado | Tipo | Descritivo | Obrigatório
-:------|:------|:------|:-----:
-UF | Lista de Dados | Lista de UFs para Consulta de Regras. Por padrão enviar a UF da Empresa Filial | **Sim**
-CFOP | Código da Operação | Código da Operação a ser Realizada. Deve ser enviada uma operação coerente com os dados desejados, por exemplo, uma Operação de Venda deve conter um CFOP que indique operação de Venda, mesmo que este não seja o correto. Para Operações de Venda enviar por padrão "5102" | **Sim**
-Característica Tributária | Lista de Códigos Inteiros | Indica o Tipo de Destinatário da Operação | **Sim**
-Finalidade | Código | Indica a Destinação do Produto para a Operação informada. É importante para especificar a operação. | Não
-Simples Nacional | Caractere | Indica se o Destinatário da Operação é Simples Nacional ou Não. Preenchido com 'S' ou 'N'. Se CRT da Empresa é igual a 1 ou 2, enviar 'S', senão enviar 'N'. | Não
-Origem | Código | Indica a Origem da Mercadoria. Se Tipo de Consulta igual a Método 1, e Código de Barras não iniciar em 789 ou 790, enviar Código 8. | **Sim**
-Substituição Tributária | Caractere | Indica se o destinatário é Substituto Tributário. Valor padrão igual a 'N' | Não
+Dado | Tipo | Descritivo | Valor Padrão |Obrigatório
+:------|:------|:------|:-------:|:-------:
+UF | Lista de Dados | Lista de UFs para Consulta de Regras. | UF da Empresa Filial |**Sim**
+CFOP | Código da Operação | Código da Operação a ser Realizada. Deve ser enviada uma operação coerente com os dados desejados, por exemplo, uma Operação de Venda deve conter um CFOP que indique operação de Venda, mesmo que este não seja o correto. | "5102" |**Sim**
+Característica Tributária | Lista de Códigos Inteiros | Indica o Tipo de Destinatário da Operação | Código "8" |**Sim**
+Finalidade | Código | Indica a Destinação do Produto para a Operação informada. É importante para especificar a operação. | Código "0" | Não
+Simples Nacional | Caractere | Indica se o Destinatário da Operação é Simples Nacional ou Não. Preenchido com 'S' ou 'N'. Se CRT da Empresa é igual a 1 ou 2, enviar 'S', senão enviar 'N'. | 'N' | Não
+Origem | Código | Indica a Origem da Mercadoria. Se Tipo de Consulta igual a Método 1, e Código de Barras não iniciar em 789 ou 790, enviar Código 8. | Código "0" | **Sim**
+Substituição Tributária | Caractere | Indica se o destinatário é Substituto Tributário. | 'N' | Não
 
-   
-## Fluxograma da Consulta Tributação
+Após a obtenção dos dos Dados Necessários para envio da Requisição, o **Fluxo de Consulta** pode ser visualizado através do Esquema abaixo:   
+
 - ![Fluxo de Consulta - Novo Produto](./Flow-Consulta-Produto.jpeg)
 
 [Voltar ao Sumário](#sumario)
