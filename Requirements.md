@@ -53,9 +53,9 @@ Tipo de Elemento | Pai | Nome/Texto | Descritivo
 **Caixa de Seleção** | **Comportamento** | Permitir Vincular Produtos utilizando Código iMendes | Permite ao usuário vincular um Produto Cadastrado com um Produto iMendes Consultado por Descrição.
 **Caixa de Seleção** | **Comportamento** | Verificar Alterações de Produtos Automaticamente em: [ x ] dias. | Parâmetro para definir a periodicidade de consulta à atualizações de grades realizadas pelo iMendes. Deve ser numérico e interpretado como "dias". Valor padrão: 15 dias
 
-## Exemplo de Tela de Configurações e Parâmetros: 
+## Protótipo de Configurações e Parâmetros: 
   
-  ![Exemplo de Parâmetros](./parametros.png) 
+  ![Protótipo de Parâmetros](./parametros.png) 
 
 
 [Voltar ao Sumário](#sumario)
