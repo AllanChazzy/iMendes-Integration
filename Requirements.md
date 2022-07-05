@@ -6,14 +6,14 @@
 - [Requisitos Iniciais](#requisitos-iniciais)
   - [Cadastro de Empresas](#cadastro-de-empresas)
   - [Parâmetros do Sistema](#parâmetros-do-sistema)
-  - [Exemplo de Tela de Configurações e Parâmetros:](#exemplo-de-tela-de-configurações-e-parâmetros)
+  - [Protótipo de Configurações e Parâmetros:](#protótipo-de-configurações-e-parâmetros)
 - [Requisitos Específicos](#requisitos-específicos)
   - [Consulta Tributos - Cadastro de Produtos](#consulta-tributos---cadastro-de-produtos)
     - [Fluxo de Consulta](#fluxo-de-consulta)
-  - [Decrever em Etapas todos os Processos](#decrever-em-etapas-todos-os-processos)
-    - [Etapa 1 - Coleta de Dados](#etapa-1---coleta-de-dados)
-    - [Etapa 2 - Montagem da Requisição (revisar esse termo)](#etapa-2---montagem-da-requisição-revisar-esse-termo)
-    - [Fluxograma da Consulta Tributação](#fluxograma-da-consulta-tributação)
+  - [Requisitos - Consulta iMendes Cadastro de Produtos](#requisitos---consulta-imendes-cadastro-de-produtos)
+  - [Campos](#campos)
+  - [Tipos de Consulta](#tipos-de-consulta)
+  - [Fluxograma da Consulta Tributação](#fluxograma-da-consulta-tributação)
   - [Consulta Tributos - Gerenciador de Tributação](#consulta-tributos---gerenciador-de-tributação)
     - [Métodos Básicos](#métodos-básicos)
     - [Métodos Avançados](#métodos-avançados)
@@ -69,37 +69,32 @@ Nesta seção, serão descritos os Requisitos necessários para atender à Homol
 
 ## Consulta Tributos - Cadastro de Produtos
 ### Fluxo de Consulta
-Conforme documentação disponibilizada pela iMendes, uma boa prática é fornecer ao Usuário um método de Consulta de Tributos no Cadastro do Produto, em dois momentos:
+Conforme documentação disponibilizada pela iMendes o Usuário deve conseguir efetuar Consulta de Tributos no Cadastro do Produto, em dois momentos:
    1. Durante o Cadastramento de um Novo Produto;
    2. Durante o processo de Atualização de um Produto já Cadastrado.
 
+De modo simplificado, os passos são:
+   1. Aciona o Botão de Consulta iMendes;
+   2. Recebe o Retorno com a Tributação;
+   3. Confere as informações e Confirma.
 
-## Decrever em Etapas todos os Processos
-### Etapa 1 - Coleta de Dados
-### Etapa 2 - Montagem da Requisição (revisar esse termo)
+## Requisitos - Consulta iMendes Cadastro de Produtos
+Para disponibilizar ao usuário o recurso, é necessário incluir uma Função no Cadastro de Produtos para que seja acionada quando o usuário desejar, conforme descritivo abaixo:
 
-Analisando a Estrutura de envio de Requisição, um processo comum é executado e orientado conforme os seguintes passos:
-  1. Prepara a Requisição JSON, utilizando os dados do Emitente, Perfil e Produto.
-     1. O Perfil possui informações chave que são:
-        - UF = UF do Emitente
-        - CFOP = 5102 (Operação Interna de Venda)
-        - Característica Tributária = 8 (Consumidor Final Pessoa Física)
-        - Finalidade = 0 (Revenda)
-     2. O Produto pode ser enviado por três métodos:
-        1. **Código de Barras (EAN/GTIN) e Descrição**. Identificar se o Código de Barras informado possui 8, 12, 13 ou 14 dígitos e se é um Código de Barras válido.
-           1. Se Código de Barras é um GTIN válido e não iniciar com 789 ou 790, em Perfil, enviar "origem" igual a 8.
-        2. **Apenas Descrição (Método Consulta Produtos iMendes)**. Quando produto não possuir Código de Barras EAN/GTIN ou em branco, e não estiver vinculado a um Código iMendes. 
-        3. **Código iMendes e Descrição**. Enviar o EAN/GTIN, Descrição e Código iMendes vinculado.
-   1. Realiza a Conexão com API
-      1. Se método de consulta igual a 1 (Código de Barras e Descrição), enviar o Código de Barras e Descrição informados durante o Cadastramento.
-      2. Se método de consulta igual a 2 (Apenas descrição), utilizar o método "Produtos iMendes" enviando apenas a descrição informada pelo Usuário.
-         1. Fornecer ao Usuário um meio de selecionar um Produto localizado pela Descrição (em uma lista), e permitir vinculá-lo ao seu Cadastro utilizando o Código iMendes. O usuário poderá vincular apenas 1 Código iMendes por Produto cadastrado.
-         2. Executar a Consulta de Tributação utilizando o Código iMendes vinculado. 
-      3. Se método de consulta igual a 3 (Código iMendes), em Produtos, enviar preenchido o campo "CodIMendes" e a Descrição do Produto.
-   2. Captura o Retorno da Tributação para a Operação padrão
-   3. Efetua a Gravação de Logs de Consulta, Dados de Retorno e Produtos Alterados.
+## Campos
+Tipo | Pai | Nome/Texto | Descritivo | Validações
+:------|:------|:------|:------|:------
+**Botão** | **Tributação / Fiscal** | Consultar iMendes | Botão para acionar a Consulta de Tributos na API iMendes.| Solicitar Chave de Acesso Restrito para realizar a Consulta.
+**Campo Inteiro**|**Dados do Produto**|Código iMendes| Campo para armazenar o Código iMendes quando ocorrer o vínculo. Tipo Inteiro | Somente leitura.
 
-### Fluxograma da Consulta Tributação
+## Tipos de Consulta
+Método | Tipo | Descritivo | Validações | API | Tags Principais
+:------|:------|:------|:------|:------|:------
+**Método 1** | **Código de Barras EAN/GTIN e Descrição** | Consultar a Tributação do Produto utilizando o Código de Barras EAN/GTIN e a Descrição do Produto | Identificar se o Código é um EAN válido, considerando tamanho de 8, 12, 13 ou 14 dígitos. Se EAN válido, identificar se o Prefixo do Código de Barras inicia em 789 ou 790, e enviar origem igual a 0, caso contrário enviar origem igual a 8. Capturar o retorno dos dados.| **Saneamento** |"codigo":"EAN", "codInterno":"N", "codIMendes":"", "descricao":"DESCRICAO"
+**Método 2** |**Apenas Descrição** | Consultar a Tributação de um Produto utilizando a Descrição. Capturar a lista de Produtos semelhantes, e permitir vincular um Produto iMendes com o Produto corrente. | Permitir vincular apenas um Produto iMendes com um Produto cadastrado. Criar acesso restrito para esta operação. Identificar se o Produto está sem Código de Barras e não vinculado a um Código iMendes.|**Envia/Recebe Dados**|"nomeservico":"DESCPRODUTOS", "dados":"CNPJ|DESCRICAO"
+**Método 3** | **Código iMendes e Descrição** | Consultar a Tributação do Produto utilizando o Código iMendes previamente vinculado. Capturar o retorno normalmente como ocorre no Método 1 | Identificar se o Produto possui um Código iMendes, se sim, utilizar esta informação para localizar a tributação.| **Saneamento** |"codIMendes":"CODIGOVINCULADO", "descricao":"DESCRICAO"            
+   
+## Fluxograma da Consulta Tributação
 - ![Fluxo de Consulta - Novo Produto](./Flow-Consulta-Produto.jpeg)
 
 [Voltar ao Sumário](#sumario)
