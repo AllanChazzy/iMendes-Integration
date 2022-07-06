@@ -23,15 +23,15 @@
 - O presente documento objetiva descrever em detalhes os processos e meios para integração da Consulta Tributária iMendes no Sistema Ganso. 
 - Nesta integração, o Sistema Ganso comunica-se com o portal tributário do Grupo iMendes através de uma **API**, e realiza a consulta da Tributação dos produtos e retorna as informações. 
 - A consulta pode ocorrer de duas maneiras: **durante a realização de um novo Cadastro** ou **consultando a tributação de um produto Cadastrado** 
-- Para que a integração seja bem sucedida, é necssário que o CNPJ do estabelecimento consulente (Cliente que realizará as consultas) esteja liberado mediante aquisição de licença com o Setor Comercial do Grupo iMendes. (Levando em consideração que a Ganso Sistemas seja um parceiro ativo).
+- Para que a integração seja bem sucedida, é necessário que o CNPJ do estabelecimento consulente (Cliente que realizará as consultas) esteja liberado mediante aquisição de licença com o Setor Comercial do Grupo iMendes. (Levando em consideração que a Ganso Sistemas seja um parceiro ativo).
 
 # Requisitos Iniciais
 Nesta seção, serão descritos os **Requisitos Iniciais e Obrigatórios** para a continuidade do processo de integração, e descreve os principais parâmetros de Configuração. 
-- Para o correto funcionamento das Requisições à API iMendes, dados do Emitente da Consulta são necessários e a maioria deles estão disponíveis no Cadastro de Empresa e nos Parâmetros do Sistema Ganso. Contudo, há necessidade em criar Estruturas para as seguintes informações abaixo:
+- Para o correto funcionamento das Requisições à API iMendes, dados do Emitente da Consulta são necessários e a maioria deles estão disponíveis no Cadastro de Empresa e nos Parâmetros do Sistema Ganso. Contudo, há necessidade em criar Estruturas Complementares para as seguintes informações abaixo:
 
 ## Cadastro de Empresas
 
-Tipo | Rotina/Recurso | Descritivo | Validações | Obrigatório
+Tipo | Nome/Texto | Descritivo | Validações | Obrigatório
 :------|:------|:------|:-------|:-----:
 **Caixa de Combinação** | Regime Tributário | Campo para informar a Subclassificação do CRT que pode ser definida entre **Lucro Real - LR** ou **Lucro Presumido - LP**. | Deve ser ativado apenas se o CRT selecionado for igual a 3. | **Sim**
 
@@ -60,7 +60,7 @@ Tipo de Elemento | Pai | Nome/Texto | Descritivo
 [Voltar ao Sumário](#sumario)
 
 # Requisitos Específicos
-Nesta seção, serão descritos os **Requisitos Obrigatórios** para atender à Homologação e os Recursos mais importantes desta integração, que são:
+Nesta seção, são descritos os **Requisitos Obrigatórios** para atender à Homologação e os Recursos mais importantes desta integração, que são:
 - Consulta via Cadastro de Produtos - Cadastrando um Novo Item
 - Consulta via Cadastro de Produtos - Atualizando informações de um Produto Cadastrado
 - Consulta em Lote para vários Produtos
@@ -97,11 +97,11 @@ Método | Tipo | Descritivo | Validações | API | Tags de Envio Principais
 **Método 2** |**Apenas Descrição** | Consultar a Tributação de um Produto utilizando a Descrição. Capturar a lista de Produtos semelhantes, e permitir vincular um Produto iMendes com o Produto corrente. | Permitir vincular apenas um Produto iMendes com um Produto cadastrado. Criar acesso restrito para esta operação. Identificar se o Produto está sem Código de Barras e não vinculado a um Código iMendes.|**Envia/Recebe Dados**|"nomeservico":"DESCPRODUTOS", "dados":"CNPJ|DESCRICAO"
 **Método 3** | **Código iMendes e Descrição** | Consultar a Tributação do Produto utilizando o Código iMendes previamente vinculado. Capturar o retorno normalmente como ocorre no Método 1 | Identificar se o Produto possui um Código iMendes, se sim, utilizar esta informação para localizar a tributação. | **Saneamento** | "codIMendes":"CODIGOVINCULADO", "descricao":"DESCRICAO"
 
-Além do Método de Consulta, outras informações são necessárias para envio da Requisição, que compõem o **Perfil** a ser consultado. Estas informações foram classificadas e organizadas, e mesmo as não obrigatórias, devem ser enviadas com valores padrão. Conforme análise, o objetivo de Consulta através do Cadastro é obter dados para **Saída na Operação de Venda ao Consumidor (NFC-e)**, portanto os seguintes parâmetros devem ser considerados:
+Além do Método de Consulta, outras informações são necessárias para envio da Requisição, que compõem o **Perfil** a ser consultado. Estas informações foram classificadas e organizadas, e mesmo as não obrigatórias, devem ser enviadas com valores padrão. Conforme análise, o objetivo de Consulta através do Cadastro é obter dados para **Saída na Operação de Venda ao Consumidor (NFC-e)**, portanto os seguintes parâmetros devem ser considerados como padrão:
 
 Dado | Tipo | Descritivo | Valor Padrão |Obrigatório
 :------|:------|:------|:-------:|:-------:
-UF | Lista de Dados | Lista de UFs para Consulta de Regras. | UF da Empresa Filial |**Sim**
+UF | Lista de Dados | Lista de UFs para Consulta de Regras. | UF da Empresa Filial Logada |**Sim**
 CFOP | Código da Operação | Código da Operação a ser Realizada. Deve ser enviada uma operação coerente com os dados desejados, por exemplo, uma Operação de Venda deve conter um CFOP que indique operação de Venda, mesmo que este não seja o correto. | "5102" |**Sim**
 Característica Tributária | Lista de Códigos Inteiros | Indica o Tipo de Destinatário da Operação | Código "8" |**Sim**
 Finalidade | Código | Indica a Destinação do Produto para a Operação informada. É importante para especificar a operação. | Código "0" | Não
