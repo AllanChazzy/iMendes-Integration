@@ -19,6 +19,7 @@
   - [Consulta Tributos - Gerenciador de Tributação](#consulta-tributos---gerenciador-de-tributação)
     - [Métodos Básicos](#métodos-básicos)
     - [Métodos Avançados](#métodos-avançados)
+  - [Tabela de Validações](#tabela-de-validações)
   - [Relatórios Gerenciais - Logs](#relatórios-gerenciais---logs)
 
 # Introdução
@@ -123,24 +124,28 @@ Após a obtenção dos dos Dados Necessários para envio da Requisição, o **Fl
 Nesta seção, são descritos os **Relacionamentos de Informações** retornadas pela API iMendes com a Estrutura do Sistema Ganso, indicando em Campo Destino onde deverão ser Gravadas as respectivas informações retornadas pela API.                  
 
 ## Destino: Tabela Produto
-Campo Retornado | Tag Pai | Campo Destino | Descritivo | Tratamento
+Tag Pai | Campo Retornado | Campo Destino | Descritivo | Tratamento
 :------|:-----|:------|:------|:------
-nCM | Grupos | ncm | NCM do Produto | -
-cEST | Grupos | cest | CEST do Produto | -
-codAno | Grupos | prod_esp_com_codigo_anp | Código da ANP | Gravar somente quando o produto é especifico do tipo Combustível
-ex | iPI | ex_tipi | Exclusão da TIPI | -
+Grupos | nCM | ncm | NCM do Produto | -
+Grupos | cEST | cest | CEST do Produto | -
+Grupos | codAno | prod_esp_com_codigo_anp | Código da ANP | Gravar somente quando o produto é especifico do tipo Combustível
+iPI | ex | ex_tipi | Exclusão da TIPI | -
 
 ## Destino: Tabela Produto Parâmetros
-Campo Retornado | Tag Pai | Campo Destino | Descritivo | Tratamento
+Tag Pai | Campo Retornado | Campo Destino | Descritivo | Tratamento
 :------|:-----|:------|:------|:------
-cstEnt | pisCofins | cst_pis_entrada e cst_cofins_entrada | CST de Pis e Cofins de Entrada | Informar o mesmo retorno para ambos os Campos Destino. O CST de PIS e Cofins de Entrada são sempre iguais
-cstSai | pisCofins | cst_pis e cst_cofins | CST de Pis e Cofins de Saída | Informar o mesmo retorno para ambos os Campos Destino. O CST de PIS e Cofins de Saída são sempre iguais
-aliqPis | pisCofins | codigo_tributo_pis_entrada e codigo_tributo_pis_saida / f_pis_compra e f_pis_venda | Alíquota de Pis de Entrada e Saída | Gravar o Código do Tributo, resultante de uma consulta comparando o valor de retorno deste campo efetuando uma pesquisa na Tabela **tributos** onde o campo o "tipo" seja igual a 'PIS' e "aliquota" seja igual ao valor retornado. Gravar em ambos Campos Destino o "codigo" encontrado e Gravar o valor retornado nos campos f_pis_compra e f_pis_venda.
-aliqCofins | pisCofins | codigo_tributo_cofins_entrada e codigo_tributo_cofins_saida / f_cofins_compra e f_cofins_venda | Alíquota de Cofins de Entrada e Saída | Gravar o Código do Tributo, resultante de uma consulta comparando o valor de retorno deste campo efetuando uma pesquisa na Tabela **tributos** onde o campo o "tipo" seja igual a 'COF' e "aliquota" seja igual ao valor retornado. Gravar em ambos Campos Destino o "codigo" encontrado e gravar o valor retornado nos campos f_cofins_compra e f_cofins_venda.
-cFOP | CaracTrib | codigo_cfop_nfc | Código da Operação CFOP de Saída | Obrigatório para transmissão de documentos fiscais
-cST | CaracTrib | cst e cst_nfc | CST de Saída | Informar o mesmo retorno em ambos os campos relativos. A informação é utilizada tanto para NFC-e quanto para NF-e
-cSOSN | CaracTrib | csosn e csosn_nfc | CSOSN de Saída | Informar o mesmo retorno em ambos os campos relativos. Esta informação só deve ser gravada quando o CRT da Empresa for igual a 1 ou 2.
-aliqIcmsInterna | CaracTrib | codigo_tributo | Alíquota do ICMS de Saída | Comparar o valor de retorno deste campo efetuando uma pesquisa na Tabela **produto_tributo** onde o campo "cst" seja igual a este valor **e** o campo "situacao" seja igual a 0 **e** a "situacao_tributaria" seja igual ao campo **simbPDV** da Tag Pai **infPDV** e gravar no campo relativo o "codigo" encontrado.
+pisCofins |cstEnt | cst_pis_entrada e cst_cofins_entrada | CST de Pis e Cofins de Entrada | Informar o mesmo retorno para ambos os Campos Destino. O CST de PIS e Cofins de Entrada são sempre iguais
+pisCofins | cstSai | cst_pis e cst_cofins | CST de Pis e Cofins de Saída | Informar o mesmo retorno para ambos os Campos Destino. O CST de PIS e Cofins de Saída são sempre iguais
+pisCofins | aliqPis | codigo_tributo_pis_entrada e codigo_tributo_pis_saida / f_pis_compra e f_pis_venda | Alíquota de Pis de Entrada e Saída | Gravar o Código do Tributo, resultante de uma consulta na Tabela **tributos** onde o campo "tipo" seja igual a 'PIS' e "aliquota" seja igual ao valor retornado. Gravar em ambos Campos Destino o "codigo" encontrado e Gravar o valor retornado nos campos f_pis_compra e f_pis_venda.
+pisCofins | aliqCofins | codigo_tributo_cofins_entrada e codigo_tributo_cofins_saida / f_cofins_compra e f_cofins_venda | Alíquota de Cofins de Entrada e Saída | Gravar o Código do Tributo, resultante de uma consulta na Tabela **tributos** onde o campo "tipo" seja igual a 'COF' e "aliquota" seja igual ao valor retornado. Gravar em ambos Campos Destino o "codigo" encontrado e gravar o valor retornado nos campos f_cofins_compra e f_cofins_venda.
+pisCofins | nri | cst_natureza_receita_piscofins | CST da Natureza da Receita de PIS e Cofins | Verificar a existência do Código de Natureza da Receita ("codigo_natureza_receita") na tabela **natureza_receita** onde os campos "cst_pis" e "cst_cofins" contém o 'cstEnt' ou 'cstSai', se existir, gravar no campo destino, se não existir, incluir esta nova natureza de receita na tabela **natureza_receita** preenchendo o campo "natureza_receita" com uma descrição genérica e os campos "cst_pis" e "cst_cofins" com as informações dos campos 'cstEnt' e 'cstSai' separados por vírgula.
+iPI | cstEnt | cst_ipi_entrada | CST de IPI de Entrada | Informar no campo de destino
+iPI | cstSai | cst_ipi | CST de IPI de Saída | Informar no campo de destino
+iPI | aliqipi | codigo_tributo_ipi | Alíquota de IPI de Saída | Gravar o Código do Tributo, resultante de uma consulta na Tabela **produto_tributo** onde o campo "situacao" seja igual a 1 e "cst" seja igual ao valor retornado e "situacao_tributaria" seja igual a 'T'
+CaracTrib | cFOP | codigo_cfop_nfc | Código da Operação CFOP de Saída | Informar no campo de destino
+CaracTrib | cST | cst e cst_nfc | CST de Saída | Informar o mesmo retorno em ambos os campos relativos. A informação é utilizada tanto para NFC-e quanto para NF-e
+CaracTrib | cSOSN | csosn e csosn_nfc | CSOSN de Saída | Informar o mesmo retorno em ambos os campos relativos. Esta informação só deve ser gravada quando o CRT da Empresa for igual a 1 ou 2.
+CaracTrib | aliqIcmsInterna | codigo_tributo | Alíquota do ICMS de Saída | Gravar o Código do Tributo, resultante de uma consulta na Tabela **produto_tributo** onde o campo "situacao" seja igual a 0 e "cst" seja igual ao valor retornado e "situacao_tributaria" seja igual ao campo **simbPDV** da Tag Pai **infPDV** e gravar no campo relativo o "codigo" encontrado.
 
 
 
@@ -149,5 +154,7 @@ aliqIcmsInterna | CaracTrib | codigo_tributo | Alíquota do ICMS de Saída | Com
 ## Consulta Tributos - Gerenciador de Tributação
 ### Métodos Básicos
 ### Métodos Avançados
+
+## Tabela de Validações
 
 ## Relatórios Gerenciais - Logs
