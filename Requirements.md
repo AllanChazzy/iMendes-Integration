@@ -5,14 +5,17 @@
 - [Introdução](#introdução)
 - [Requisitos Iniciais](#requisitos-iniciais)
   - [Cadastro de Empresas](#cadastro-de-empresas)
-  - [Parâmetros do Sistema](#parâmetros-do-sistema)
-  - [Protótipo de Configurações e Parâmetros:](#protótipo-de-configurações-e-parâmetros)
+  - [Parâmetros de Comunicação](#parâmetros-de-comunicação)
+  - [Parâmetros de Regras](#parâmetros-de-regras)
 - [Requisitos Específicos](#requisitos-específicos)
   - [Consulta Tributos - Cadastro de Produtos](#consulta-tributos---cadastro-de-produtos)
     - [Fluxo de Consulta](#fluxo-de-consulta)
   - [Requisitos - Consulta iMendes Cadastro de Produtos](#requisitos---consulta-imendes-cadastro-de-produtos)
   - [Campos](#campos)
   - [Tipos de Consulta](#tipos-de-consulta)
+- [Relacionamento de Dados - Retorno iMendes x Ganso](#relacionamento-de-dados---retorno-imendes-x-ganso)
+  - [Destino: Tabela Produto](#destino-tabela-produto)
+  - [Destino: Tabela Produto Parâmetros](#destino-tabela-produto-parâmetros)
   - [Consulta Tributos - Gerenciador de Tributação](#consulta-tributos---gerenciador-de-tributação)
     - [Métodos Básicos](#métodos-básicos)
     - [Métodos Avançados](#métodos-avançados)
@@ -27,35 +30,36 @@
 
 # Requisitos Iniciais
 Nesta seção, serão descritos os **Requisitos Iniciais e Obrigatórios** para a continuidade do processo de integração, e descreve os principais parâmetros de Configuração. 
-- Para o correto funcionamento das Requisições à API iMendes, dados do Emitente da Consulta são necessários e a maioria deles estão disponíveis no Cadastro de Empresa e nos Parâmetros do Sistema Ganso. Contudo, há necessidade em criar Estruturas Complementares para as seguintes informações abaixo:
+- Para o correto funcionamento das Requisições à API iMendes, dados do Emitente da Consulta são necessários e a maioria deles estão disponíveis no Cadastro de Empresa do Sistema Ganso. Contudo, há necessidade em criar estruturas complementares para as seguintes informações abaixo:
 
 ## Cadastro de Empresas
-
 Tipo | Nome/Texto | Descritivo | Validações | Obrigatório
 :------|:------|:------|:-------|:-----:
 **Caixa de Combinação** | Regime Tributário | Campo para informar a Subclassificação do CRT que pode ser definida entre **Lucro Real - LR** ou **Lucro Presumido - LP**. | Deve ser ativado apenas se o CRT selecionado for igual a 3. | **Sim**
 
-## Parâmetros do Sistema
+## Parâmetros de Comunicação
+São dados necessários para efetuar a comunicação com os Servidores da iMendes. Abaixo estão descritos quais informações devem ser criadas, quais suas funções.
+
 Tipo de Elemento | Pai | Nome/Texto | Descritivo
 :-----------|:------|:------|:------
 **Caixa de Seleção** | - | Ativar Integração de Consulta Tributária iMendes | Parâmetro Global para ativação das configurações da API
 **Grupo** | - | URLs da API | Organiza os campos de Configuração necessários para conectividade com o Servidor.
-**Campo Texto** | **URLs da API** | Saneamento (Consulta Tributação) | Campo para infomrar a URL da API que retorna Dados da Tributação do produto consultado. Tamanho máximo de 255 caracteres
+**Campo Texto** | **URLs da API** | Saneamento (Consulta Tributação) | Campo para informar a URL da API que retorna Dados da Tributação do produto consultado. Tamanho máximo de 255 caracteres
 **Campo Texto** | **URLs da API** | Envia e Recebe Dados (Outros Métodos) | Campo para informar a URL da API que recebe os comandos extras e retorna produtos alterados. Tamanho máximo de 255 caracteres
 **Campo Texto Mascarado** | **URLs da API** | Senha | Campo para Senha do Usuário Integrado. Tamanho máximo de 20 caracteres, sem validações. 
 **Botão de Seleção** | **URLs da API** | Versão | Seleção da Versão da API contratada. Disponibilizar as versões 2.0 e 3.0 de seleção única (somente uma das opções pode ser selecionada)
 **Campo Texto** | **URLs da API** | Tempo de Resposta | Timeout ou Tempo de Resposta máximo da API. Deve ser numérico e interpretado como "segundos". Valor padrão: 15 segundos
-**Botão** | **URLs da API** | Verificar Status | Botão para verificação da Conectividade com as APIs. Deve retornar uma mensagem de Sucesso ou Falha, para ambas APIs.
+**Botão** | **URLs da API** | Verificar Status | Botão para testar a Conectividade com as APIs utilizando os dados informados. Deve retornar uma mensagem de Sucesso ou Falha, para ambas APIs.
+
+## Parâmetros de Regras
+Tipo de Elemento | Pai | Nome/Texto | Descritivo
+:-----------|:------|:------|:------
 **Grupo** | - | **Comportamento** | Organiza os parâmetros que definem as regras de funcionamento da integração e automatismos.
 **Caixa de Seleção** | **Comportamento** | Atualizar Tributos dos Produtos Automaticamente | Permite atualização automatizada dos tributos de produtos ao consultar um Produto ou Receber atualizações em lote através do *Gerenciador Tributário*
 **Caixa de Seleção** | **Comportamento** | Atualizar Grade Fiscal Ganso com Informações de Entrada Consultadas | Permite criar Regras Fiscais Ganso através das informações tributárias coletadas em consultas.
 **Caixa de Seleção** | **Comportamento** | Permitir Consultar Tributos no Cadastro de Produtos | Permite ao usuário efetuar a consulta iMendes durante o Cadastramento de Novo Produto ou Atualização de um Produto Cadastrado.
 **Caixa de Seleção** | **Comportamento** | Permitir Vincular Produtos utilizando Código iMendes | Permite ao usuário vincular um Produto Cadastrado com um Produto iMendes Consultado por Descrição.
 **Caixa de Seleção** | **Comportamento** | Verificar Alterações de Produtos Automaticamente em: [ x ] dias. | Parâmetro para definir a periodicidade de consulta à atualizações de grades realizadas pelo iMendes. Deve ser numérico e interpretado como "dias". Valor padrão: 15 dias
-
-## Protótipo de Configurações e Parâmetros: 
-  
-  ![Protótipo de Parâmetros](./parametros.png)
 
 [Voltar ao Sumário](#sumario)
 
@@ -111,7 +115,34 @@ Substituição Tributária | Caractere | Indica se o destinatário é Substituto
 
 Após a obtenção dos dos Dados Necessários para envio da Requisição, o **Fluxo de Consulta** pode ser visualizado através do Esquema abaixo:   
 
-- ![Fluxo de Consulta - Novo Produto](./Flow-Consulta-Produto.jpeg)
+<!-- - ![Fluxo de Consulta - Novo Produto](./Flow-Consulta-Produto.jpeg) -->
+
+[Voltar ao Sumário](#sumario)
+
+# Relacionamento de Dados - Retorno iMendes x Ganso
+Nesta seção, são descritos os **Relacionamentos de Informações** retornadas pela API iMendes com a Estrutura do Sistema Ganso, indicando em Campo Destino onde deverão ser Gravadas as respectivas informações retornadas pela API.                  
+
+## Destino: Tabela Produto
+Campo Retornado | Tag Pai | Campo Destino | Descritivo | Tratamento
+:------|:-----|:------|:------|:------
+nCM | Grupos | ncm | NCM do Produto | -
+cEST | Grupos | cest | CEST do Produto | -
+codAno | Grupos | prod_esp_com_codigo_anp | Código da ANP | Gravar somente quando o produto é especifico do tipo Combustível
+ex | iPI | ex_tipi | Exclusão da TIPI | -
+
+## Destino: Tabela Produto Parâmetros
+Campo Retornado | Tag Pai | Campo Destino | Descritivo | Tratamento
+:------|:-----|:------|:------|:------
+cstEnt | pisCofins | cst_pis_entrada e cst_cofins_entrada | CST de Pis e Cofins de Entrada | Informar o mesmo retorno para ambos os Campos Destino. O CST de PIS e Cofins de Entrada são sempre iguais
+cstSai | pisCofins | cst_pis e cst_cofins | CST de Pis e Cofins de Saída | Informar o mesmo retorno para ambos os Campos Destino. O CST de PIS e Cofins de Saída são sempre iguais
+aliqPis | pisCofins | codigo_tributo_pis_entrada e codigo_tributo_pis_saida / f_pis_compra e f_pis_venda | Alíquota de Pis de Entrada e Saída | Gravar o Código do Tributo, resultante de uma consulta comparando o valor de retorno deste campo efetuando uma pesquisa na Tabela **tributos** onde o campo o "tipo" seja igual a 'PIS' e "aliquota" seja igual ao valor retornado. Gravar em ambos Campos Destino o "codigo" encontrado e Gravar o valor retornado nos campos f_pis_compra e f_pis_venda.
+aliqCofins | pisCofins | codigo_tributo_cofins_entrada e codigo_tributo_cofins_saida / f_cofins_compra e f_cofins_venda | Alíquota de Cofins de Entrada e Saída | Gravar o Código do Tributo, resultante de uma consulta comparando o valor de retorno deste campo efetuando uma pesquisa na Tabela **tributos** onde o campo o "tipo" seja igual a 'COF' e "aliquota" seja igual ao valor retornado. Gravar em ambos Campos Destino o "codigo" encontrado e gravar o valor retornado nos campos f_cofins_compra e f_cofins_venda.
+cFOP | CaracTrib | codigo_cfop_nfc | Código da Operação CFOP de Saída | Obrigatório para transmissão de documentos fiscais
+cST | CaracTrib | cst e cst_nfc | CST de Saída | Informar o mesmo retorno em ambos os campos relativos. A informação é utilizada tanto para NFC-e quanto para NF-e
+cSOSN | CaracTrib | csosn e csosn_nfc | CSOSN de Saída | Informar o mesmo retorno em ambos os campos relativos. Esta informação só deve ser gravada quando o CRT da Empresa for igual a 1 ou 2.
+aliqIcmsInterna | CaracTrib | codigo_tributo | Alíquota do ICMS de Saída | Comparar o valor de retorno deste campo efetuando uma pesquisa na Tabela **produto_tributo** onde o campo "cst" seja igual a este valor **e** o campo "situacao" seja igual a 0 **e** a "situacao_tributaria" seja igual ao campo **simbPDV** da Tag Pai **infPDV** e gravar no campo relativo o "codigo" encontrado.
+
+
 
 [Voltar ao Sumário](#sumario)
 
