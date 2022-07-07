@@ -1,7 +1,7 @@
 # Requisitos - Integração Consulta Tributária Ganso iMendes
 ---
-# Sumário
-- [Sumário](#sumário)
+Índice
+
 - [Introdução](#introdução)
 - [Requisitos Iniciais](#requisitos-iniciais)
   - [Cadastro de Empresas](#cadastro-de-empresas)
@@ -16,13 +16,14 @@
       - [Tipos de Consulta](#tipos-de-consulta)
       - [Fluxo de Decisão do Método de Consulta](#fluxo-de-decisão-do-método-de-consulta)
       - [Perfil de Envio](#perfil-de-envio)
-    - [Composição da Requisição - Resumo da Operação de Consulta](#composição-da-requisição---resumo-da-operação-de-consulta)
+      - [Composição da Requisição - Resumo da Operação de Consulta](#composição-da-requisição---resumo-da-operação-de-consulta)
   - [Captura do Retorno das Informações](#captura-do-retorno-das-informações)
     - [Histórico de Consultas](#histórico-de-consultas)
-  - [Relacionamento de Dados - Retorno iMendes x Ganso](#relacionamento-de-dados---retorno-imendes-x-ganso)
-    - [Destino: Tabela Produto](#destino-tabela-produto)
-    - [Destino: Tabela Produto Parâmetros](#destino-tabela-produto-parâmetros)
-  - [Consulta Tributos - Gerenciador de Tributação](#consulta-tributos---gerenciador-de-tributação)
+      - [Atualizações Tributárias](#atualizações-tributárias)
+    - [Relacionamento de Dados - Retorno iMendes x Ganso](#relacionamento-de-dados---retorno-imendes-x-ganso)
+      - [Destino: Tabela Produto](#destino-tabela-produto)
+      - [Destino: Tabela Produto Parâmetros](#destino-tabela-produto-parâmetros)
+  - [Recurso 2 - Consulta Tributos em Lote - Gerenciador de Tributação](#recurso-2---consulta-tributos-em-lote---gerenciador-de-tributação)
     - [Métodos Básicos](#métodos-básicos)
     - [Métodos Avançados](#métodos-avançados)
   - [Tabela de Validações](#tabela-de-validações)
@@ -67,6 +68,7 @@ Tipo de Elemento | Pai | Nome/Texto | Descritivo
 **Caixa de Seleção** | **Comportamento** | Permitir Consultar Tributos no Cadastro de Produtos | Permite ao usuário efetuar a consulta iMendes durante o Cadastramento de Novo Produto ou Atualização de um Produto Cadastrado.
 **Caixa de Seleção** | **Comportamento** | Permitir Vincular Produtos utilizando Código iMendes | Permite ao usuário vincular um Produto Cadastrado com um Produto iMendes Consultado por Descrição.
 **Caixa de Seleção** | **Comportamento** | Verificar Alterações de Produtos Automaticamente em: [ x ] dias. | Parâmetro para definir a periodicidade de consulta à atualizações de grades realizadas pelo iMendes. Deve ser numérico e interpretado como "dias". Valor padrão: 15 dias
+**Caixa de Seleção** | **Comportamento** | Permitir Atualização Parcial das Informações Tributárias do Produto | Parâmetro para definir se o usuário terá permissão em aceitar apenas campos específicos da Tributação consultada. Quando esta opção está desativada, não será permitido desmarcar campos na Tela exibição dos Tributos consultados
 
 [Voltar ao Sumário](#sumario)
 
@@ -132,11 +134,11 @@ Simples Nacional | Caractere | Indica se o Destinatário da Operação é Simple
 Origem | Código | Indica a Origem da Mercadoria. Se Tipo de Consulta igual a Método 1, e Código de Barras não iniciar em 789 ou 790, enviar Código 8. | Código "0" | **Sim**
 Substituição Tributária | Caractere | Indica se o destinatário é Substituto Tributário. | 'N' | Não
 
-### Composição da Requisição - Resumo da Operação de Consulta
+#### Composição da Requisição - Resumo da Operação de Consulta
 1. Coleta dados do **Cadastro de Empresa** para gerar a gera a Tag ```"emit"```
 3. Coleta dados do **Perfil de Envio** para gerar a Tag ```"perfil"```
 4. Coleta dados do **Produto**, aplicando um dos **Métodos de Consulta** definidos em **Tipo de Consulta** para gerar a Tag ```"produtos"```
-5. Enviar a Estrutura JSON de Requisição utilizando a **API** apontada no **Método de Consulta** utilizado.
+5. Enviar a Estrutura JSON de Requisição utilizando a **API** apontada no **Método de Consulta** utilizado. [Ver Métodos de Consulta](#tipos-de-consulta)
 
 Após a obtenção dos Dados Necessários para envio da Requisição, o **Fluxo de Consulta** pode ser visualizado através do Esquema abaixo:   
 
@@ -154,12 +156,26 @@ Retorno de Consulta | Armazenar os Retornos de cada Produto Consultado | Código
 Alterações de Produtos | Armazenar as Alterações Tributárias Promovidas pela iMendes relacionadas aos Produtos do Usuário | Código do Produto, Data e Hora, Dados Alterados para Consumo 
 Dados Ignorados| Armazenar os Campos e Dados que foram ignorados pelo Usuário durante a Confirmação de Retorno | Armazenar por Produto e Usuário, Todos os campos e dados não selecionados pelo Usuário
 
-Após captura e armazenamento dos dados consultados, e o Usuário **Aceitar** as informações tributárias para o Produto, é necessário gravá-las no Cadastro do Produto. Abaixo estão descritas as informações Retornadas por Grupo e qual o destino da mesma no Sistema Ganso.
+Após captura e armazenamento dos dados consultados, um dos Requisitos para Homologação descreve que o Usuário precisa ter liberdade em **Aceitar** as atualizações Tributárias para o Produto total ou parcial, para gravá-las no Cadastro do Produto Consultado. Deste modo, é necessário exibir em Tela este retorno contendo todos os Dados **Antes e Depois**, destacando claramente quais apresentam divergências. Os elementos necessários nesta exibição estão descritas abaixo:
 
-## Relacionamento de Dados - Retorno iMendes x Ganso
+#### Atualizações Tributárias
+Campo | Informação de exibição | Validações
+:---|:---|:---
+Código Interno | Código do Produto Ganso | Somente Leitura
+Descrição | Descrição do Produto Ganso | Somente Leitura
+Código de Barras | GTIN/EAN do Produto Consultado | Somente Leitura
+Código iMendes | Código iMendes Vinculado ao Produto Consultado | Somente Leitura
+Grade de Dados "Tributação Atual" | Exibir todos os campos relacionados em [Destino: Produtos](#destino-tabela-produto) e [Destino: Produto Parâmetros](#destino-tabela-produto-parâmetros) com informações atuais gravadas no Produto no Sistema Ganso | Somente Leitura
+Grade de Dados "Tributação Nova"| Exibir todos os campos relacionados em [Destino: Produtos](#destino-tabela-produto) e [Destino: Produto Parâmetros](#destino-tabela-produto-parâmetros) com informações **que a Consulta à API retornou** | Opção para Selecionar individualmente cada campo
+Botão de Confirmação | Exibir uma Caixa de Diálogo com texto de confirmação de alteração de dados. Havendo campos parciais, incluí-los na mensagem para deixar claro ao usuário as alterações que serão realizadas | Solicitar Acesso Restrito para Gravar todos os Dados ou Dados Parciais
+
+
+Abaixo estão descritas as informações Retornadas por Grupo e qual o destino da mesma no Sistema Ganso.
+
+### Relacionamento de Dados - Retorno iMendes x Ganso
 Nesta seção, são descritos os **Relacionamentos de Informações** retornadas pela API iMendes com a Estrutura do Sistema Ganso, indicando em Campo Destino onde deverão ser Gravadas as respectivas informações retornadas pela API.                  
 
-### Destino: Tabela Produto
+#### Destino: Tabela Produto
 Tag Pai | Campo Retornado | Campo Destino | Descritivo | Tratamento
 :------|:-----|:------|:------|:------
 Grupos | nCM | ncm | NCM do Produto | -
@@ -167,7 +183,7 @@ Grupos | cEST | cest | CEST do Produto | Remover a máscara retornada pelo iMend
 Grupos | codAnp | prod_esp_com_codigo_anp | Código da ANP | Gravar somente quando o produto é especifico do tipo Combustível
 iPI | ex | ex_tipi | Exclusão da TIPI | -
 
-### Destino: Tabela Produto Parâmetros
+#### Destino: Tabela Produto Parâmetros
 Tag Pai | Campo Retornado | Campo Destino | Descritivo | Tratamento
 :------|:-----|:------|:------|:------
 pisCofins |cstEnt | cst_pis_entrada e cst_cofins_entrada | CST de Pis e Cofins de Entrada | Informar o mesmo retorno para ambos os Campos Destino. O CST de PIS e Cofins de Entrada são sempre iguais
@@ -193,10 +209,10 @@ CaracTrib | pDifer | *percentual_diferimento** | Percentual de Diferimento de En
 
 * Os campos sinalizados deverão ser discutidos em reunião de planejamento. Será necessário criar versões para saída estadual e interestadual, se houver desenvolvimento de uma Regra Fiscal de Saída.
 
-
 [Voltar ao Sumário](#sumario)
 
-## Consulta Tributos - Gerenciador de Tributação
+## Recurso 2 - Consulta Tributos em Lote - Gerenciador de Tributação
+
 ### Métodos Básicos
 ### Métodos Avançados
 
