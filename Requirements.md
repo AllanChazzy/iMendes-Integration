@@ -143,10 +143,19 @@ iPI | cstEnt | cst_ipi_entrada | CST de IPI de Entrada | Informar no campo de de
 iPI | cstSai | cst_ipi | CST de IPI de Saída | Informar no campo de destino
 iPI | aliqipi | codigo_tributo_ipi | Alíquota de IPI de Saída | Gravar o Código do Tributo, resultante de uma consulta na Tabela **produto_tributo** onde o campo "situacao" seja igual a 1 e "cst" seja igual ao valor retornado e "situacao_tributaria" seja igual a 'T'
 CaracTrib | cFOP | codigo_cfop_nfc | Código da Operação CFOP de Saída | Informar no campo de destino
-CaracTrib | cST | cst e cst_nfc | CST de Saída | Informar o mesmo retorno em ambos os campos relativos. A informação é utilizada tanto para NFC-e quanto para NF-e
+CaracTrib | cST | cst e cst_nfc | CST de Saída | Concatenar o dígito 0 como prefixo e informar o mesmo retorno em ambos os campos relativos. A informação é utilizada tanto para NFC-e quanto para NF-e
 CaracTrib | cSOSN | csosn e csosn_nfc | CSOSN de Saída | Informar o mesmo retorno em ambos os campos relativos. Esta informação só deve ser gravada quando o CRT da Empresa for igual a 1 ou 2.
 CaracTrib | aliqIcmsInterna | codigo_tributo | Alíquota do ICMS de Saída | Gravar o Código do Tributo, resultante de uma consulta na Tabela **produto_tributo** onde o campo "situacao" seja igual a 0 e "cst" seja igual ao valor retornado e "situacao_tributaria" seja igual ao campo **simbPDV** da Tag Pai **infPDV** e gravar no campo relativo o "codigo" encontrado.
+CaracTrib | reducaoBcIcms | f_rbc_icms_sai_estadual | Redução de Base de Cálculo do ICMS Estadual | Informar no campo de destino o valor retornado
+CaracTrib | reducaoBcIcmsSt | f_st_rbc_icms_sai_estadual | Redução de Base de Cálculo do ICMS ST Estadual | Informar no campo de destino o valor retornado
+CaracTrib | reducaoBcIcmsStInterestadual | f_st_rbc_icms_sai_interestadual | Redução de Base de Cálculo do ICMS ST Interestadual | Informar no campo de destino o valor retornado
+CaracTrib | iVA | f_st_mva_saida | Margem de Valor Agregado de Saída Estadual | Informar no campo de destino o valor retornado
+CaracTrib | iVAAjust | f_st_mva* | Margem de Valor Agregado Interestadual | Informar no campo de destino o valor retornado. 
+CaracTrib | fCP | percentual_fcp* | Percentual de Fundo de Combate à Pobreza de Entrada | Informar no campo de destino o valor retornado
+CaracTrib | codBenef | cod_beneficio_fiscal | Código do Benefício Fiscal | Informar no campo de destino o valor retornado
+CaracTrib | pDifer | percentual_diferimento* | Percentual de Diferimento de Entrada | Informar no campo de destino o valor retornado
 
+* Os campos sinalizados deverão ser discutidos em reunião de planejamento. Será necessário criar versões para saída estadual e interestadual, se houver desenvolvimento de uma Regra Fiscal de Saída.
 
 
 [Voltar ao Sumário](#sumario)
