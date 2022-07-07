@@ -8,15 +8,15 @@
   - [Parâmetros de Comunicação](#parâmetros-de-comunicação)
   - [Regras Parametrizáveis](#regras-parametrizáveis)
 - [Requisitos Específicos](#requisitos-específicos)
-  - [Consulta Tributos - Cadastro de Produtos](#consulta-tributos---cadastro-de-produtos)
+  - [Recurso 1 - Consulta Tributos - Cadastro de Produtos](#recurso-1---consulta-tributos---cadastro-de-produtos)
     - [Fluxo de Consulta](#fluxo-de-consulta)
-  - [Requisitos para Consulta iMendes Cadastro de Produtos](#requisitos-para-consulta-imendes-cadastro-de-produtos)
-    - [Funções](#funções)
-    - [Campos](#campos)
-    - [Tipos de Consulta](#tipos-de-consulta)
-    - [Fluxo de Decisão do Método](#fluxo-de-decisão-do-método)
-    - [Perfil de Envio](#perfil-de-envio)
-    - [Composição da Requisição - Resumo da Consulta](#composição-da-requisição---resumo-da-consulta)
+    - [Requisitos da Operação](#requisitos-da-operação)
+      - [Funções Necessárias](#funções-necessárias)
+      - [Campos Necessários](#campos-necessários)
+      - [Tipos de Consulta](#tipos-de-consulta)
+      - [Fluxo de Decisão do Método de Consulta](#fluxo-de-decisão-do-método-de-consulta)
+      - [Perfil de Envio](#perfil-de-envio)
+    - [Composição da Requisição - Resumo da Operação de Consulta](#composição-da-requisição---resumo-da-operação-de-consulta)
   - [Captura do Retorno das Informações](#captura-do-retorno-das-informações)
     - [Histórico de Consultas](#histórico-de-consultas)
   - [Relacionamento de Dados - Retorno iMendes x Ganso](#relacionamento-de-dados---retorno-imendes-x-ganso)
@@ -60,7 +60,7 @@ Tipo de Elemento | Pai | Nome/Texto | Descritivo
 
 ## Regras Parametrizáveis
 Tipo de Elemento | Pai | Nome/Texto | Descritivo
-:-----------|:------|:------|:------
+:--------|:------|:------|:------
 **Grupo** | - | **Comportamento** | Organiza os parâmetros que definem as regras de funcionamento da integração e automatismos.
 **Caixa de Seleção** | **Comportamento** | Atualizar Tributos dos Produtos Automaticamente | Permite atualização automatizada dos tributos de produtos ao consultar um Produto ou Receber atualizações em lote através do *Gerenciador Tributário*
 **Caixa de Seleção** | **Comportamento** | Atualizar Grade Fiscal Ganso com Informações de Entrada Consultadas | Permite criar Regras Fiscais Ganso através das informações tributárias coletadas em consultas.
@@ -78,7 +78,7 @@ Nesta seção, são descritos os **Requisitos Obrigatórios** para atender à Ho
 - Controle de Acesso e Acessos Restritos (Operações Especiais).
 - Verificação de Conformidade com a Estrutura MVP sugerida pela iMendes.
 
-## Consulta Tributos - Cadastro de Produtos
+## Recurso 1 - Consulta Tributos - Cadastro de Produtos
 ### Fluxo de Consulta
 Conforme documentação disponibilizada pela iMendes o Usuário deve conseguir efetuar Consulta de Tributos no Cadastro do Produto, em dois momentos:
    1. Durante o Cadastramento de um Novo Produto;
@@ -90,24 +90,24 @@ De modo simplificado, os passos são:
    3. Receber e visualizar o Retorno com a Tributação antiga e a Nova;
    4. Confirmar ou não as alterações.
 
-## Requisitos para Consulta iMendes Cadastro de Produtos
+### Requisitos da Operação
 Para disponibilizar ao usuário o recurso, é necessário incluir **Funções no Cadastro de Produtos** para que sejam acionadas quando o usuário desejar, e novos Campos, conforme descritivo abaixo:
 
-### Funções
+#### Funções Necessárias
 Nome | Descritivo | Validações
 :-----|:-----|:------
 Consultar Tributação iMendes | Acionar a Consulta de Tributos na API iMendes | Solicitar Chave de Acesso Restrito para realizar a Consulta.
 Consultar Histórico de Alterações Tributárias | Acionar a visualização do Histórico de Alterações do Produto | -
 Desfazer Alterações Tributárias | Acionar função para usuário reverter dados Tributários alterados pelo iMendes consultando o Histórico e com possibilidade de escolha do ponto de reversão desejado | Solicitar Chave de Acesso Restrito
 
-### Campos
+#### Campos Necessários
 Tipo | Posicionamento | Nome/Texto | Descritivo | Validações
 :------|:------|:------|:------|:------
 **Campo**|**Grupo Dados do Produto**|Código iMendes| Campo para armazenar e exibir o Código iMendes quando ocorrer o vínculo efetuado pelo Usuário | Deve ser do Tipo Inteiro e Somente leitura.
 **Campo** | A Definir |Auditado por iMendes| Campo para armazenar e exibir a informação de que o Produto teve a tributação auditada/atualizada pela iMendes. Complementar esta informação com a Data e Hora da última atualização tributária | Somente leitura e visualmente destacado
 **Caixa de Seleção** | A Definir | **Não tributar pelo iMendes** | Parâmetro para restringir a atualização de Tributos do Produto pelo iMendes. Por decisão do Usuário, alguns produtos podem ser tributados seguindo a sua própria interpretação. | Solicitar Acesso Restrito para ativar e desativar o parâmetro.
 
-### Tipos de Consulta
+#### Tipos de Consulta
 Além dos campos e funções, é necessário criar Métodos de Consulta que trata o **Comportamento do Usuário** e direciona a Consulta para o fluxo correto de consumo das APIs. Todos os métodos são requeridos, e a API retorna informações distintas conforme método utilizado que são:
 
 Método | Tipo de Consulta | Descritivo | Validações | API a Consumir | Tags de Envio Principais
@@ -116,12 +116,12 @@ Método | Tipo de Consulta | Descritivo | Validações | API a Consumir | Tags d
 **Método 2** |**Apenas Descrição** | Consultar a Tributação de um Produto utilizando a Descrição. Capturar a lista de Produtos semelhantes, e permitir vincular um Produto iMendes com o Produto corrente. | Permitir vincular apenas um Produto iMendes com um Produto cadastrado. Criar acesso restrito para esta operação. Identificar se o Produto está sem Código de Barras e não vinculado a um Código iMendes.|**Envia/Recebe Dados**|"nomeservico":"DESCPRODUTOS", "dados":"CNPJ|DESCRICAO"
 **Método 3** | **Código iMendes e Descrição** | Consultar a Tributação do Produto utilizando o Código iMendes previamente vinculado. Capturar o retorno normalmente como ocorre no Método 1 | Identificar se o Produto possui um Código iMendes, se sim, utilizar esta informação para localizar a tributação. | **Saneamento** | "codIMendes":"CODIGOVINCULADO", "descricao":"DESCRICAO"
 
-### Fluxo de Decisão do Método
+#### Fluxo de Decisão do Método de Consulta
 - ![Fluxo de Decisão do Método de Consulta](./Flow-Decision-Method.jpeg)
 
 Além dos Métodos de Consulta, outras informações que compõem o **Perfil** a ser consultado são necessárias para envio da Requisição. Estas informações foram classificadas e organizadas, e mesmo as não obrigatórias, devem ser enviadas com valores padrão. Conforme análise, o objetivo de Consulta através do Cadastro é obter dados para **Saída na Operação de Venda ao Consumidor (NFC-e)**, portanto os parâmetros definidos abaixo devem ser considerados em seus **Valores Padrão**:
 
-### Perfil de Envio
+#### Perfil de Envio
 Dado | Tipo | Descritivo | Valor Padrão |Obrigatório
 :------|:------|:------|:-------:|:-------:
 UF | Lista de Dados | Lista de UFs para Consulta de Regras. | UF da Empresa Filial Logada |**Sim**
@@ -132,13 +132,13 @@ Simples Nacional | Caractere | Indica se o Destinatário da Operação é Simple
 Origem | Código | Indica a Origem da Mercadoria. Se Tipo de Consulta igual a Método 1, e Código de Barras não iniciar em 789 ou 790, enviar Código 8. | Código "0" | **Sim**
 Substituição Tributária | Caractere | Indica se o destinatário é Substituto Tributário. | 'N' | Não
 
-### Composição da Requisição - Resumo da Consulta
-1. Coleta dados do Emitente e Forma a Tag "emit"
-2. Coleta dados do Perfil e Forma a Tag "perfil"
-3. Coleta dados do Produto, Aplica um dos **Métodos de Consulta** e Forma a Tag "produtos"
-4. Envia a Requisição observando o **Método de Consulta** utilizado.
+### Composição da Requisição - Resumo da Operação de Consulta
+1. Coleta dados do **Cadastro de Empresa** para gerar a gera a Tag ```"emit"```
+3. Coleta dados do **Perfil de Envio** para gerar a Tag ```"perfil"```
+4. Coleta dados do **Produto**, aplicando um dos **Métodos de Consulta** definidos em **Tipo de Consulta** para gerar a Tag ```"produtos"```
+5. Enviar a Estrutura JSON de Requisição utilizando a **API** apontada no **Método de Consulta** utilizado.
 
-Após a obtenção dos dos Dados Necessários para envio da Requisição, o **Fluxo de Consulta** pode ser visualizado através do Esquema abaixo:   
+Após a obtenção dos Dados Necessários para envio da Requisição, o **Fluxo de Consulta** pode ser visualizado através do Esquema abaixo:   
 
 - ![Fluxo de Consulta - Novo Produto](./Flow-Consulta-Produto.jpeg)
 
