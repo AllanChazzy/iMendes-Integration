@@ -16,10 +16,11 @@
     - [Tipos de Consulta](#tipos-de-consulta)
     - [Perfil de Envio](#perfil-de-envio)
     - [Composição da Requisição - Resumo da Consulta](#composição-da-requisição---resumo-da-consulta)
-    - [<span style="color:#E16847">Captura do Retorno das Informações](#span-stylecolore16847captura-do-retorno-das-informações)
-- [Relacionamento de Dados - Retorno iMendes x Ganso](#relacionamento-de-dados---retorno-imendes-x-ganso)
-  - [Destino: Tabela Produto](#destino-tabela-produto)
-  - [Destino: Tabela Produto Parâmetros](#destino-tabela-produto-parâmetros)
+  - [Captura do Retorno das Informações](#captura-do-retorno-das-informações)
+    - [Histórico de Consultas](#histórico-de-consultas)
+  - [Relacionamento de Dados - Retorno iMendes x Ganso](#relacionamento-de-dados---retorno-imendes-x-ganso)
+    - [Destino: Tabela Produto](#destino-tabela-produto)
+    - [Destino: Tabela Produto Parâmetros](#destino-tabela-produto-parâmetros)
   - [Consulta Tributos - Gerenciador de Tributação](#consulta-tributos---gerenciador-de-tributação)
     - [Métodos Básicos](#métodos-básicos)
     - [Métodos Avançados](#métodos-avançados)
@@ -95,6 +96,8 @@ Para disponibilizar ao usuário o recurso, é necessário incluir uma **Função
 Nome | Descritivo | Validações
 :-----|:-----|:------
 Consultar Tributação iMendes | Acionar a Consulta de Tributos na API iMendes | Solicitar Chave de Acesso Restrito para realizar a Consulta.
+Consultar Histórico de Alterações Tributárias | Acionar a visualização do Histórico de Alterações do Produto | -
+Desfazer Alterações Tributárias | Acionar função para usuário reverter dados Tributários alterados pelo iMendes consultando o Histórico e com possibilidade de escolha do ponto de reversão desejado | Solicitar Chave de Acesso Restrito
 
 ### Campos
 Tipo | Posicionamento | Nome/Texto | Descritivo | Validações
@@ -136,22 +139,31 @@ Após a obtenção dos dos Dados Necessários para envio da Requisição, o **Fl
 <!-- - ![Fluxo de Consulta - Novo Produto](./Flow-Consulta-Produto.jpeg) -->
 
 [Voltar ao Sumário](#sumario)
-### <span style="color:#E16847">Captura do Retorno das Informações
+## Captura do Retorno das Informações
+Após efetuar a Consulta e obter o retorno com os Dados Tributários, é necessário efetuar a Gravação de Histórico de Consulta. Abaixo são descritos quais são necessários:
 
-[Voltar ao Sumário](#sumario)
+### Histórico de Consultas
+Nome do Histórico | Descritivo | Dados Principais
+:----|:-----|:----
+Consumo da API | Armanezenar todas as Consultas Realizadas por Usuário | Usuário, Data e Hora, CNPJ, Método de Consulta e Produtos Consultados
+Retorno de Consulta | Armazenar os Retornos de cada Produto Consultado | Código de Produto, Data e Hora, Dados Completos Retornados da API, e informações invidivuais relacionadas com campos existentes no Sistema Ganso
+Alterações de Produtos | Armazenar as Alterações Tributárias Promovidas pela iMendes relacionadas aos Produtos do Usuário | Código do Produto, Data e Hora, Dados Alterados para Consumo 
+Dados Ignorados| Armazenar os Campos e Dados que foram ignorados pelo Usuário durante a Confirmação de Retorno | Armazenar por Produto e Usuário, Todos os campos e dados não selecionados pelo Usuário
 
-# Relacionamento de Dados - Retorno iMendes x Ganso
+Após captura e armazenamento dos dados consultados, e o Usuário **Aceitar** as informações tributárias para o Produto, é necessário gravá-las no Cadastro do Produto. Abaixo estão descritas as informações Retornadas por Grupo e qual o destino da mesma no Sistema Ganso.
+
+## Relacionamento de Dados - Retorno iMendes x Ganso
 Nesta seção, são descritos os **Relacionamentos de Informações** retornadas pela API iMendes com a Estrutura do Sistema Ganso, indicando em Campo Destino onde deverão ser Gravadas as respectivas informações retornadas pela API.                  
 
-## Destino: Tabela Produto
+### Destino: Tabela Produto
 Tag Pai | Campo Retornado | Campo Destino | Descritivo | Tratamento
 :------|:-----|:------|:------|:------
 Grupos | nCM | ncm | NCM do Produto | -
-Grupos | cEST | cest | CEST do Produto | -
-Grupos | codAno | prod_esp_com_codigo_anp | Código da ANP | Gravar somente quando o produto é especifico do tipo Combustível
+Grupos | cEST | cest | CEST do Produto | Remover a máscara retornada pelo iMendes
+Grupos | codAnp | prod_esp_com_codigo_anp | Código da ANP | Gravar somente quando o produto é especifico do tipo Combustível
 iPI | ex | ex_tipi | Exclusão da TIPI | -
 
-## Destino: Tabela Produto Parâmetros
+### Destino: Tabela Produto Parâmetros
 Tag Pai | Campo Retornado | Campo Destino | Descritivo | Tratamento
 :------|:-----|:------|:------|:------
 pisCofins |cstEnt | cst_pis_entrada e cst_cofins_entrada | CST de Pis e Cofins de Entrada | Informar o mesmo retorno para ambos os Campos Destino. O CST de PIS e Cofins de Entrada são sempre iguais
@@ -170,10 +182,10 @@ CaracTrib | reducaoBcIcms | f_rbc_icms_sai_estadual | Redução de Base de Cálc
 CaracTrib | reducaoBcIcmsSt | f_st_rbc_icms_sai_estadual | Redução de Base de Cálculo do ICMS ST Estadual | Informar no campo de destino o valor retornado
 CaracTrib | reducaoBcIcmsStInterestadual | f_st_rbc_icms_sai_interestadual | Redução de Base de Cálculo do ICMS ST Interestadual | Informar no campo de destino o valor retornado
 CaracTrib | iVA | f_st_mva_saida | Margem de Valor Agregado de Saída Estadual | Informar no campo de destino o valor retornado
-CaracTrib | iVAAjust | f_st_mva* | Margem de Valor Agregado Interestadual | Informar no campo de destino o valor retornado. 
-CaracTrib | fCP | percentual_fcp* | Percentual de Fundo de Combate à Pobreza de Entrada | Informar no campo de destino o valor retornado
+CaracTrib | iVAAjust | *f_st_mva** | Margem de Valor Agregado Interestadual | Informar no campo de destino o valor retornado. 
+CaracTrib | fCP | *percentual_fcp** | Percentual de Fundo de Combate à Pobreza de Entrada | Informar no campo de destino o valor retornado
 CaracTrib | codBenef | cod_beneficio_fiscal | Código do Benefício Fiscal | Informar no campo de destino o valor retornado
-CaracTrib | pDifer | percentual_diferimento* | Percentual de Diferimento de Entrada | Informar no campo de destino o valor retornado
+CaracTrib | pDifer | *percentual_diferimento** | Percentual de Diferimento de Entrada | Informar no campo de destino o valor retornado
 
 * Os campos sinalizados deverão ser discutidos em reunião de planejamento. Será necessário criar versões para saída estadual e interestadual, se houver desenvolvimento de uma Regra Fiscal de Saída.
 
