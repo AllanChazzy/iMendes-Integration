@@ -6,7 +6,7 @@
 - [Requisitos Iniciais](#requisitos-iniciais)
   - [Cadastro de Empresas](#cadastro-de-empresas)
   - [Parâmetros de Comunicação](#parâmetros-de-comunicação)
-  - [Parâmetros de Regras](#parâmetros-de-regras)
+  - [Regras Parametrizáveis](#regras-parametrizáveis)
 - [Requisitos Específicos](#requisitos-específicos)
   - [Consulta Tributos - Cadastro de Produtos](#consulta-tributos---cadastro-de-produtos)
     - [Fluxo de Consulta](#fluxo-de-consulta)
@@ -14,6 +14,7 @@
     - [Funções](#funções)
     - [Campos](#campos)
     - [Tipos de Consulta](#tipos-de-consulta)
+    - [Fluxo de Decisão do Método](#fluxo-de-decisão-do-método)
     - [Perfil de Envio](#perfil-de-envio)
     - [Composição da Requisição - Resumo da Consulta](#composição-da-requisição---resumo-da-consulta)
   - [Captura do Retorno das Informações](#captura-do-retorno-das-informações)
@@ -57,7 +58,7 @@ Tipo de Elemento | Pai | Nome/Texto | Descritivo
 **Campo Texto** | **URLs da API** | Tempo de Resposta | Timeout ou Tempo de Resposta máximo da API. Deve ser numérico e interpretado como "segundos". Valor padrão: 15 segundos
 **Botão** | **URLs da API** | Verificar Status | Botão para testar a Conectividade com as APIs utilizando os dados informados. Deve retornar uma mensagem de Sucesso ou Falha, para ambas APIs.
 
-## Parâmetros de Regras
+## Regras Parametrizáveis
 Tipo de Elemento | Pai | Nome/Texto | Descritivo
 :-----------|:------|:------|:------
 **Grupo** | - | **Comportamento** | Organiza os parâmetros que definem as regras de funcionamento da integração e automatismos.
@@ -90,7 +91,7 @@ De modo simplificado, os passos são:
    4. Confirmar ou não as alterações.
 
 ## Requisitos para Consulta iMendes Cadastro de Produtos
-Para disponibilizar ao usuário o recurso, é necessário incluir uma **Função no Cadastro de Produtos** para que seja acionada quando o usuário desejar, e novos Campos, conforme descritivo abaixo:
+Para disponibilizar ao usuário o recurso, é necessário incluir **Funções no Cadastro de Produtos** para que sejam acionadas quando o usuário desejar, e novos Campos, conforme descritivo abaixo:
 
 ### Funções
 Nome | Descritivo | Validações
@@ -102,18 +103,21 @@ Desfazer Alterações Tributárias | Acionar função para usuário reverter dad
 ### Campos
 Tipo | Posicionamento | Nome/Texto | Descritivo | Validações
 :------|:------|:------|:------|:------
-**Campo**|**Grupo Dados do Produto**|Código iMendes| Campo para armazenar e exibir o Código iMendes quando ocorrer o vínculo. | Deve ser do Tipo Inteiro e Somente leitura.
-**Campo** | A Definir |Auditado por iMendes| Campo para armazenar e exibir a informação de que o Produto teve a tributação auditada/atualizada pela iMendes | Somente leitura.
+**Campo**|**Grupo Dados do Produto**|Código iMendes| Campo para armazenar e exibir o Código iMendes quando ocorrer o vínculo efetuado pelo Usuário | Deve ser do Tipo Inteiro e Somente leitura.
+**Campo** | A Definir |Auditado por iMendes| Campo para armazenar e exibir a informação de que o Produto teve a tributação auditada/atualizada pela iMendes. Complementar esta informação com a Data e Hora da última atualização tributária | Somente leitura e visualmente destacado
 **Caixa de Seleção** | A Definir | **Não tributar pelo iMendes** | Parâmetro para restringir a atualização de Tributos do Produto pelo iMendes. Por decisão do Usuário, alguns produtos podem ser tributados seguindo a sua própria interpretação. | Solicitar Acesso Restrito para ativar e desativar o parâmetro.
 
 ### Tipos de Consulta
-Além dos campos e funções, é necessário criar Métodos de Consulta que trata o **Comportamento do Usuário** e direciona a Consulta para o fluxo correto de consumo das APIs. Todos os métodos são requeridos, e a API retorna informações distintas conforme método utilizado. Os Métodos são:
+Além dos campos e funções, é necessário criar Métodos de Consulta que trata o **Comportamento do Usuário** e direciona a Consulta para o fluxo correto de consumo das APIs. Todos os métodos são requeridos, e a API retorna informações distintas conforme método utilizado que são:
 
 Método | Tipo de Consulta | Descritivo | Validações | API a Consumir | Tags de Envio Principais
 :------|:------|:------|:------|:------|:------
 **Método 1** | **Código de Barras EAN/GTIN e Descrição** | Consultar a Tributação do Produto utilizando o Código de Barras EAN/GTIN e a Descrição do Produto | Identificar se o Código é um EAN válido, considerando tamanho de 8, 12, 13 ou 14 dígitos. Se EAN válido, identificar se o Prefixo do Código de Barras inicia em 789 ou 790, e enviar origem igual a 0, caso contrário enviar origem igual a 8. Capturar o retorno dos dados.| **Saneamento** |"codigo":"EAN", "codInterno":"N", "codIMendes":"", "descricao":"DESCRICAO"
 **Método 2** |**Apenas Descrição** | Consultar a Tributação de um Produto utilizando a Descrição. Capturar a lista de Produtos semelhantes, e permitir vincular um Produto iMendes com o Produto corrente. | Permitir vincular apenas um Produto iMendes com um Produto cadastrado. Criar acesso restrito para esta operação. Identificar se o Produto está sem Código de Barras e não vinculado a um Código iMendes.|**Envia/Recebe Dados**|"nomeservico":"DESCPRODUTOS", "dados":"CNPJ|DESCRICAO"
 **Método 3** | **Código iMendes e Descrição** | Consultar a Tributação do Produto utilizando o Código iMendes previamente vinculado. Capturar o retorno normalmente como ocorre no Método 1 | Identificar se o Produto possui um Código iMendes, se sim, utilizar esta informação para localizar a tributação. | **Saneamento** | "codIMendes":"CODIGOVINCULADO", "descricao":"DESCRICAO"
+
+### Fluxo de Decisão do Método
+- ![Fluxo de Decisão do Método de Consulta](./Flow-Decision-Method.jpeg)
 
 Além dos Métodos de Consulta, outras informações que compõem o **Perfil** a ser consultado são necessárias para envio da Requisição. Estas informações foram classificadas e organizadas, e mesmo as não obrigatórias, devem ser enviadas com valores padrão. Conforme análise, o objetivo de Consulta através do Cadastro é obter dados para **Saída na Operação de Venda ao Consumidor (NFC-e)**, portanto os parâmetros definidos abaixo devem ser considerados em seus **Valores Padrão**:
 
@@ -136,7 +140,7 @@ Substituição Tributária | Caractere | Indica se o destinatário é Substituto
 
 Após a obtenção dos dos Dados Necessários para envio da Requisição, o **Fluxo de Consulta** pode ser visualizado através do Esquema abaixo:   
 
-<!-- - ![Fluxo de Consulta - Novo Produto](./Flow-Consulta-Produto.jpeg) -->
+- ![Fluxo de Consulta - Novo Produto](./Flow-Consulta-Produto.jpeg)
 
 [Voltar ao Sumário](#sumario)
 ## Captura do Retorno das Informações
