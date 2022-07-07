@@ -10,9 +10,13 @@
 - [Requisitos Específicos](#requisitos-específicos)
   - [Consulta Tributos - Cadastro de Produtos](#consulta-tributos---cadastro-de-produtos)
     - [Fluxo de Consulta](#fluxo-de-consulta)
-  - [Requisitos - Consulta iMendes Cadastro de Produtos](#requisitos---consulta-imendes-cadastro-de-produtos)
-  - [Campos](#campos)
-  - [Tipos de Consulta](#tipos-de-consulta)
+  - [Requisitos para Consulta iMendes Cadastro de Produtos](#requisitos-para-consulta-imendes-cadastro-de-produtos)
+    - [Funções](#funções)
+    - [Campos](#campos)
+    - [Tipos de Consulta](#tipos-de-consulta)
+    - [Perfil de Envio](#perfil-de-envio)
+    - [Composição da Requisição - Resumo da Consulta](#composição-da-requisição---resumo-da-consulta)
+    - [<span style="color:#E16847">Captura do Retorno das Informações](#span-stylecolore16847captura-do-retorno-das-informações)
 - [Relacionamento de Dados - Retorno iMendes x Ganso](#relacionamento-de-dados---retorno-imendes-x-ganso)
   - [Destino: Tabela Produto](#destino-tabela-produto)
   - [Destino: Tabela Produto Parâmetros](#destino-tabela-produto-parâmetros)
@@ -79,31 +83,38 @@ Conforme documentação disponibilizada pela iMendes o Usuário deve conseguir e
    2. Durante o processo de Atualização de um Produto já Cadastrado.
 
 De modo simplificado, os passos são:
-   1. Aciona o Botão de Consulta iMendes;
-   2. Recebe o Retorno com a Tributação;
-   3. Confere as informações e Confirma.
+   1. Iniciar o Cadastro ou Consultar um Produto Cadastrado;
+   2. Acionar a função para Consultar Tributação iMendes;
+   3. Receber e visualizar o Retorno com a Tributação antiga e a Nova;
+   4. Confirmar ou não as alterações.
 
-## Requisitos - Consulta iMendes Cadastro de Produtos
+## Requisitos para Consulta iMendes Cadastro de Produtos
 Para disponibilizar ao usuário o recurso, é necessário incluir uma **Função no Cadastro de Produtos** para que seja acionada quando o usuário desejar, e novos Campos, conforme descritivo abaixo:
 
-## Campos
-Tipo | Pai | Nome/Texto | Descritivo | Validações
+### Funções
+Nome | Descritivo | Validações
+:-----|:-----|:------
+Consultar Tributação iMendes | Acionar a Consulta de Tributos na API iMendes | Solicitar Chave de Acesso Restrito para realizar a Consulta.
+
+### Campos
+Tipo | Posicionamento | Nome/Texto | Descritivo | Validações
 :------|:------|:------|:------|:------
-**Botão** | **Tributação / Fiscal** | Consultar iMendes | Botão para acionar a Consulta de Tributos na API iMendes.| Solicitar Chave de Acesso Restrito para realizar a Consulta.
-**Campo Inteiro**|**Dados do Produto**|Código iMendes| Campo para armazenar o Código iMendes quando ocorrer o vínculo. Tipo Inteiro | Somente leitura.
-**Caixa de Seleção** | - | **Não tributar pelo iMendes** | Parâmetro para restringir a atualização de Tributos do Produto pelo iMendes. Por decisão do Usuário, alguns produtos podem ser tributados seguindo a própria interpretação. | Solicitar Acesso Restrito para ativar o parâmetro.
+**Campo**|**Grupo Dados do Produto**|Código iMendes| Campo para armazenar e exibir o Código iMendes quando ocorrer o vínculo. | Deve ser do Tipo Inteiro e Somente leitura.
+**Campo** | A Definir |Auditado por iMendes| Campo para armazenar e exibir a informação de que o Produto teve a tributação auditada/atualizada pela iMendes | Somente leitura.
+**Caixa de Seleção** | A Definir | **Não tributar pelo iMendes** | Parâmetro para restringir a atualização de Tributos do Produto pelo iMendes. Por decisão do Usuário, alguns produtos podem ser tributados seguindo a sua própria interpretação. | Solicitar Acesso Restrito para ativar e desativar o parâmetro.
 
-## Tipos de Consulta
-Os Métodos de consulta descritos abaixo identificam o fluxo a ser tomado para consumo das APIs. Todos os métodos são requeridos, e a API retornará a informação conforme método utilizado.
+### Tipos de Consulta
+Além dos campos e funções, é necessário criar Métodos de Consulta que trata o **Comportamento do Usuário** e direciona a Consulta para o fluxo correto de consumo das APIs. Todos os métodos são requeridos, e a API retorna informações distintas conforme método utilizado. Os Métodos são:
 
-Método | Tipo | Descritivo | Validações | API | Tags de Envio Principais
+Método | Tipo de Consulta | Descritivo | Validações | API a Consumir | Tags de Envio Principais
 :------|:------|:------|:------|:------|:------
 **Método 1** | **Código de Barras EAN/GTIN e Descrição** | Consultar a Tributação do Produto utilizando o Código de Barras EAN/GTIN e a Descrição do Produto | Identificar se o Código é um EAN válido, considerando tamanho de 8, 12, 13 ou 14 dígitos. Se EAN válido, identificar se o Prefixo do Código de Barras inicia em 789 ou 790, e enviar origem igual a 0, caso contrário enviar origem igual a 8. Capturar o retorno dos dados.| **Saneamento** |"codigo":"EAN", "codInterno":"N", "codIMendes":"", "descricao":"DESCRICAO"
 **Método 2** |**Apenas Descrição** | Consultar a Tributação de um Produto utilizando a Descrição. Capturar a lista de Produtos semelhantes, e permitir vincular um Produto iMendes com o Produto corrente. | Permitir vincular apenas um Produto iMendes com um Produto cadastrado. Criar acesso restrito para esta operação. Identificar se o Produto está sem Código de Barras e não vinculado a um Código iMendes.|**Envia/Recebe Dados**|"nomeservico":"DESCPRODUTOS", "dados":"CNPJ|DESCRICAO"
 **Método 3** | **Código iMendes e Descrição** | Consultar a Tributação do Produto utilizando o Código iMendes previamente vinculado. Capturar o retorno normalmente como ocorre no Método 1 | Identificar se o Produto possui um Código iMendes, se sim, utilizar esta informação para localizar a tributação. | **Saneamento** | "codIMendes":"CODIGOVINCULADO", "descricao":"DESCRICAO"
 
-Além do Método de Consulta, outras informações são necessárias para envio da Requisição, que compõem o **Perfil** a ser consultado. Estas informações foram classificadas e organizadas, e mesmo as não obrigatórias, devem ser enviadas com valores padrão. Conforme análise, o objetivo de Consulta através do Cadastro é obter dados para **Saída na Operação de Venda ao Consumidor (NFC-e)**, portanto os seguintes parâmetros devem ser considerados como padrão:
+Além dos Métodos de Consulta, outras informações que compõem o **Perfil** a ser consultado são necessárias para envio da Requisição. Estas informações foram classificadas e organizadas, e mesmo as não obrigatórias, devem ser enviadas com valores padrão. Conforme análise, o objetivo de Consulta através do Cadastro é obter dados para **Saída na Operação de Venda ao Consumidor (NFC-e)**, portanto os parâmetros definidos abaixo devem ser considerados em seus **Valores Padrão**:
 
+### Perfil de Envio
 Dado | Tipo | Descritivo | Valor Padrão |Obrigatório
 :------|:------|:------|:-------:|:-------:
 UF | Lista de Dados | Lista de UFs para Consulta de Regras. | UF da Empresa Filial Logada |**Sim**
@@ -114,9 +125,18 @@ Simples Nacional | Caractere | Indica se o Destinatário da Operação é Simple
 Origem | Código | Indica a Origem da Mercadoria. Se Tipo de Consulta igual a Método 1, e Código de Barras não iniciar em 789 ou 790, enviar Código 8. | Código "0" | **Sim**
 Substituição Tributária | Caractere | Indica se o destinatário é Substituto Tributário. | 'N' | Não
 
+### Composição da Requisição - Resumo da Consulta
+1. Coleta dados do Emitente e Forma a Tag "emit"
+2. Coleta dados do Perfil e Forma a Tag "perfil"
+3. Coleta dados do Produto, Aplica um dos **Métodos de Consulta** e Forma a Tag "produtos"
+4. Envia a Requisição observando o **Método de Consulta** utilizado.
+
 Após a obtenção dos dos Dados Necessários para envio da Requisição, o **Fluxo de Consulta** pode ser visualizado através do Esquema abaixo:   
 
 <!-- - ![Fluxo de Consulta - Novo Produto](./Flow-Consulta-Produto.jpeg) -->
+
+[Voltar ao Sumário](#sumario)
+### <span style="color:#E16847">Captura do Retorno das Informações
 
 [Voltar ao Sumário](#sumario)
 
