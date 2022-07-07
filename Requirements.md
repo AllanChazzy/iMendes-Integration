@@ -124,15 +124,15 @@ Método | Tipo de Consulta | Descritivo | Validações | API a Consumir | Tags d
 Além dos Métodos de Consulta, outras informações que compõem o **Perfil** a ser consultado são necessárias para envio da Requisição. Estas informações foram classificadas e organizadas, e mesmo as não obrigatórias, devem ser enviadas com valores padrão. Conforme análise, o objetivo de Consulta através do Cadastro é obter dados para **Saída na Operação de Venda ao Consumidor (NFC-e)**, portanto os parâmetros definidos abaixo devem ser considerados em seus **Valores Padrão**:
 
 #### Perfil de Envio
-Dado | Tipo | Descritivo | Valor Padrão |Obrigatório
-:------|:------|:------|:-------:|:-------:
-UF | Lista de Dados | Lista de UFs para Consulta de Regras. | UF da Empresa Filial Logada |**Sim**
-CFOP | Código da Operação | Código da Operação a ser Realizada. Deve ser enviada uma operação coerente com os dados desejados, por exemplo, uma Operação de Venda deve conter um CFOP que indique operação de Venda, mesmo que este não seja o correto. | "5102" |**Sim**
-Característica Tributária | Lista de Códigos Inteiros | Indica o Tipo de Destinatário da Operação | Código "8" |**Sim**
-Finalidade | Código | Indica a Destinação do Produto para a Operação informada. É importante para especificar a operação. | Código "0" | Não
-Simples Nacional | Caractere | Indica se o Destinatário da Operação é Simples Nacional ou Não. Preenchido com 'S' ou 'N'. Se CRT da Empresa é igual a 1 ou 2, enviar 'S', senão enviar 'N'. | 'N' | Não
-Origem | Código | Indica a Origem da Mercadoria. Se Tipo de Consulta igual a Método 1, e Código de Barras não iniciar em 789 ou 790, enviar Código 8. | Código "0" | **Sim**
-Substituição Tributária | Caractere | Indica se o destinatário é Substituto Tributário. | 'N' | Não
+Dado | Tag | Tipo | Descritivo | Valor Padrão | Obrigatório
+:----|:---|:------|:------|:-------:|:-------:
+UF | ```"uf"``` | Lista de Dados | Lista de UFs para Consulta de Regras. | UF da Empresa Filial Logada |**Sim**
+CFOP | ```"cfop"```| Código da Operação | Código da Operação a ser Realizada. Deve ser enviada uma operação coerente com os dados desejados, por exemplo, uma Operação de Venda deve conter um CFOP que indique operação de Venda, mesmo que este não seja o correto. | "5102" |**Sim**
+Característica Tributária | ```"caracTrib"``` | Lista de Códigos Inteiros | Indica o Tipo de Destinatário da Operação | Código "8" |**Sim**
+Finalidade | ```"finalidade"```| Código | Indica a Destinação do Produto para a Operação informada. É importante para especificar a operação. | Código "0" | Não
+Simples Nacional | ```"simplesN"```| Caractere | Indica se o Destinatário da Operação é Simples Nacional ou Não. Preenchido com "S" ou "N". Se CRT da Empresa é igual a 1 ou 2, enviar "S", senão enviar "N". | "N" | Não
+Origem |```"origem"``` | Código | Indica a Origem da Mercadoria. Se Tipo de Consulta igual a Método 1, e Código de Barras não iniciar em 789 ou 790, enviar Código 8. | Código "0" | **Sim**
+Substituição Tributária | ```"substICMS"```| Caractere | Indica se o destinatário é Substituto Tributário. | "N" | Não
 
 #### Composição da Requisição - Resumo da Operação de Consulta
 1. Coleta dados do **Cadastro de Empresa** para gerar a gera a Tag ```"emit"```
@@ -168,7 +168,6 @@ Código iMendes | Código iMendes Vinculado ao Produto Consultado | Somente Leit
 Grade de Dados "Tributação Atual" | Exibir todos os campos relacionados em [Destino: Produtos](#destino-tabela-produto) e [Destino: Produto Parâmetros](#destino-tabela-produto-parâmetros) com informações atuais gravadas no Produto no Sistema Ganso | Somente Leitura
 Grade de Dados "Tributação Nova"| Exibir todos os campos relacionados em [Destino: Produtos](#destino-tabela-produto) e [Destino: Produto Parâmetros](#destino-tabela-produto-parâmetros) com informações **que a Consulta à API retornou** | Opção para Selecionar individualmente cada campo
 Botão de Confirmação | Exibir uma Caixa de Diálogo com texto de confirmação de alteração de dados. Havendo campos parciais, incluí-los na mensagem para deixar claro ao usuário as alterações que serão realizadas | Solicitar Acesso Restrito para Gravar todos os Dados ou Dados Parciais
-
 
 Abaixo estão descritas as informações Retornadas por Grupo e qual o destino da mesma no Sistema Ganso.
 
