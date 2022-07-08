@@ -27,7 +27,8 @@
     - [Regras da Consulta em Lote](#regras-da-consulta-em-lote)
     - [Métodos Básicos](#métodos-básicos)
     - [Métodos Avançados](#métodos-avançados)
-  - [Tabela de Validações](#tabela-de-validações)
+  - [Controle de Acesso e Acessos Restritos](#controle-de-acesso-e-acessos-restritos)
+  - [Tabela de Validações do MVP](#tabela-de-validações-do-mvp)
   - [Relatórios Gerenciais - Logs](#relatórios-gerenciais---logs)
 
 # Introdução
@@ -65,7 +66,7 @@ Tipo de Elemento | Pai | Nome/Texto | Descritivo
 :--------|:------|:------|:------
 **Grupo** | - | **Comportamento** | Organiza os parâmetros que definem as regras de funcionamento da integração e automatismos.
 **Caixa de Seleção** | **Comportamento** | Atualizar Tributos dos Produtos Automaticamente | Permite atualização automatizada dos tributos de produtos ao consultar um Produto ou Receber atualizações em lote através do *Gerenciador Tributário*
-**Caixa de Seleção** | **Comportamento** | Atualizar Grade Fiscal Ganso com Informações de Entrada Consultadas | Permite criar Regras Fiscais Ganso através das informações tributárias coletadas em consultas.
+**Caixa de Seleção** | **Comportamento** | Atualizar Grade Fiscal Ganso com Informações de Entrada Consultadas | Permite criar Regras Fiscais Ganso através das informações tributárias de Entrada coletadas em consultas.
 **Caixa de Seleção** | **Comportamento** | Permitir Consultar Tributos no Cadastro de Produtos | Permite ao usuário efetuar a consulta iMendes durante o Cadastramento de Novo Produto ou Atualização de um Produto Cadastrado.
 **Caixa de Seleção** | **Comportamento** | Permitir Vincular Produtos utilizando Código iMendes | Permite ao usuário vincular um Produto Cadastrado com um Produto iMendes Consultado por Descrição.
 **Caixa de Seleção** | **Comportamento** | Verificar Alterações de Produtos Automaticamente em: [ x ] dias. | Parâmetro para definir a periodicidade de consulta à atualizações de grades realizadas pelo iMendes. Deve ser numérico e interpretado como "dias". Valor padrão: 15 dias
@@ -77,9 +78,9 @@ Tipo de Elemento | Pai | Nome/Texto | Descritivo
 Nesta seção, são descritos os **Requisitos Obrigatórios** para atender à Homologação e os Recursos mais importantes desta integração, que são:
 - Consulta via Cadastro de Produtos - Cadastrando um Novo Item
 - Consulta via Cadastro de Produtos - Atualizando informações de um Produto Cadastrado
-- Consulta em Lote para vários Produtos
+- Consulta em Lote para vários Produtos e Envio do Cadastro Completo para iMendes
 - Controle de Acesso e Acessos Restritos (Operações Especiais).
-- Verificação de Conformidade com a Estrutura MVP sugerida pela iMendes.
+- Tabela de Verificação de Conformidade com a Estrutura MVP sugerida pela iMendes.
 
 ## Recurso 1 - Consulta Tributos - Cadastro de Produtos
 ### Fluxo de Consulta
@@ -225,6 +226,31 @@ Regra | Descritivo | Limite Máximo | Limite Recomendado | Validações
 ### Métodos Básicos
 ### Métodos Avançados
 
-## Tabela de Validações
+## Controle de Acesso e Acessos Restritos
+Item | Controle | Recurso | Descritivo | Grau de Importância
+:---|:---|:---|:---|:---
+1 | Alterar Configurações da Integração iMendes | Chave de Acesso | Solicitar Chave de Operação Especial para evitar que o Usuário ou Técnico faça alterações nas URLs de Comunicação, Senha e outras configurações da integração iMendes | **Alto**
+2 | Ativar ou Desativar o parâmetro para Atualizar Tributos dos Produtos Automaticamente | Chave de Acesso | Solicitar Chave de Operação Especial para evitar que o Usuário Ative ou Desative a atualização automática de Tributação quando houver mudanças | **Médio**
+3 | Permitir Consultar Tributos via Cadastro de Produtos | Chave de Acesso | Solicitar Chave de Acesso para Usuário realizar a Consulta Tributária através do Cadastro de Produtos | **Alto**
+3 | Permitir Gravar Atualização de Tributação no Cadastro de Produtos | Chave de Acesso | Solicitar Chave de Acesso para evitar que um Usuário não autorizado e com acesso ao Cadastro grave uma Tributação através do Cadastro de Produtos | **Alto**
+3 | Permitir Gravar Atualização **Parcial** de Tributação no Cadastro de Produtos | Chave de Acesso | Solicitar Chave de Acesso para evitar que um Usuário autorizado grave Campos Específicos de tributação (não todos) através do Cadastro de Produtos | **Alto**
+4 | Permitir Reverter, a um estado anterior, Dados Tributários alterados pela iMendes | Chave de Acesso
+
+## Tabela de Validações do MVP
+
+Item | Requisito iMendes | Requisito Ganso | Grau de Importância | Implementado
+:---|:---|:---|:---:|:---:
+MVP 1 | Opção para Usuário definir que o Produto Cadastrado não deve ser enviado à iMendes | [Campos Necessários](#campos-necessários) do Produto | **Alto** | -
+MVP 2 | Opção para Usuário enviar informações manualmente | [Recurso 2](#recurso-2---consulta-tributos-em-lote---gerenciador-de-tributação) - Consulta em Lote | **Alto** | -
+MVP 3 | Captura de Retorno controlado por Log e **Reversão** de tributação atualizada de qualquer Produto em qualquer ponto do histórico | [Funções Necessárias](#funções-necessárias) do Produto | **Alto** | -
+MVP 4 | Consultar a Tributação de um único produto através do Cadastro do Produto e receber as atualizações após consulta | [Consultar Tributação iMendes](#funções-necessárias) | **Alto** | -
+VF 1 | Opção para Usuário vincular um Produto próprio com o Código iMendes | [Consultar Tributação iMendes/Método 2](#tipos-de-consulta) | **Alto** | -
+VF 2 | Gravar e exibir no Cadastro do Produto um selo indicativo de auditoria da tributação pela IMendes | [Campos Necessários / Auditado por iMendes](#campos-necessários) | **Alto** | -
+VF 3 | Gravar e exibir o Retorno da Consulta por Produto contendo todos os campos retornados pela API e permitir a seleção de campos individuais para atualização. Apresentar a relação **Antes e Depois** e um Aceite do Usuário | [Tela/Atualizações Tributárias](#atualizações-tributárias) | **Alto** | -
+VF 4 | Efetuar verificação períodica de Atualizações Tributárias dos Produtos auditados por iMendes através do Método **Alterados** | [Regras Parametrizáveis/Atualizar Tributos Automaticamente/Consulta em Lote](#regras-parametrizáveis)| **Alto** | -
+VF 5 | Criar um Relatório Gerencial para acompanhamento do Histórico de Mudanças Tributárias ocorridas em determinado período | [Relatórios Gerenciais - Logs](#relatórios-gerenciais---logs) |**Alto** | -
+VF 6 | Implementar o **Simulador Tributário** que efetua uma verificação no Cadastro de Produtos e aponta os problemas tributários em Clientes ainda não integrados | - | **Médio** | - 
+VF 7 | Implementar mensagem de **Sugestão de Contratação da iMendes** para captura de novos clientes | - | **Baixo** | -
 
 ## Relatórios Gerenciais - Logs
+Construir Relatório de Auditoria dos Produtos iMendes, para exibir o Histórico de Alterações.
