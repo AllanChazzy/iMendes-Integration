@@ -24,6 +24,7 @@
       - [Destino: Tabela Produto](#destino-tabela-produto)
       - [Destino: Tabela Produto Parâmetros](#destino-tabela-produto-parâmetros)
   - [Recurso 2 - Consulta Tributos em Lote - Gerenciador de Tributação](#recurso-2---consulta-tributos-em-lote---gerenciador-de-tributação)
+    - [Regras da Consulta em Lote](#regras-da-consulta-em-lote)
     - [Métodos Básicos](#métodos-básicos)
     - [Métodos Avançados](#métodos-avançados)
   - [Tabela de Validações](#tabela-de-validações)
@@ -41,16 +42,16 @@ Nesta seção, serão descritos os **Requisitos Iniciais e Obrigatórios** para 
 - Para o correto funcionamento das Requisições à API iMendes, dados do Emitente da Consulta são necessários e a maioria deles estão disponíveis no Cadastro de Empresa do Sistema Ganso. Contudo, há necessidade em criar estruturas complementares para as seguintes informações abaixo:
 
 ## Cadastro de Empresas
-Tipo | Nome/Texto | Descritivo | Validações | Obrigatório
-:------|:------|:------|:-------|:-----:
-**Caixa de Combinação** | Regime Tributário | Campo para informar a Subclassificação do CRT que pode ser definida entre **Lucro Real - LR** ou **Lucro Presumido - LP**. | Deve ser ativado apenas se o CRT selecionado for igual a 3. | **Sim**
+Nome/Texto | Descritivo | Validações | Obrigatório
+|:------|:------|:-------|:-----:
+Regime Tributário | Campo para informar a Subclassificação do CRT Regime Normal que pode ser definida entre **Lucro Real - LR** ou **Lucro Presumido - LP**. | Deve ser ativado apenas se o CRT selecionado for igual a 3 - Regime Normal. | **Sim**
 
 ## Parâmetros de Comunicação
-São dados necessários para efetuar a comunicação com os Servidores da iMendes. Abaixo estão descritos quais informações devem ser criadas, quais suas funções.
+São dados necessários para efetuar a comunicação com os Servidores da iMendes. Abaixo estão descritos quais informações devem ser criadas e suas funções.
 
 Tipo de Elemento | Pai | Nome/Texto | Descritivo
 :-----------|:------|:------|:------
-**Caixa de Seleção** | - | Ativar Integração de Consulta Tributária iMendes | Parâmetro Global para ativação das configurações da API
+**Caixa de Seleção** | - | Ativar Integração de Consulta Tributária iMendes | Parâmetro Global para ativação das configurações da Integração com o Sistema
 **Grupo** | - | URLs da API | Organiza os campos de Configuração necessários para conectividade com o Servidor.
 **Campo Texto** | **URLs da API** | Saneamento (Consulta Tributação) | Campo para informar a URL da API que retorna Dados da Tributação do produto consultado. Tamanho máximo de 255 caracteres
 **Campo Texto** | **URLs da API** | Envia e Recebe Dados (Outros Métodos) | Campo para informar a URL da API que recebe os comandos extras e retorna produtos alterados. Tamanho máximo de 255 caracteres
@@ -107,6 +108,7 @@ Tipo | Posicionamento | Nome/Texto | Descritivo | Validações
 :------|:------|:------|:------|:------
 **Campo**|**Grupo Dados do Produto**|Código iMendes| Campo para armazenar e exibir o Código iMendes quando ocorrer o vínculo efetuado pelo Usuário | Deve ser do Tipo Inteiro e Somente leitura.
 **Campo** | A Definir |Auditado por iMendes| Campo para armazenar e exibir a informação de que o Produto teve a tributação auditada/atualizada pela iMendes. Complementar esta informação com a Data e Hora da última atualização tributária | Somente leitura e visualmente destacado
+**Campo** | A Definir |Enviado para Sanemamento| Campo para armazenar e exibir a informação quando o Produto foi enviado para a iMendes classificar e tributar. Será utilizado para identificar que produtos estão pendentes de tributação na iMendes, e como *flag* para apontar que precisa receber atualização. Complementar esta informação com a Data e Hora do envio | Somente leitura e visualmente destacado
 **Caixa de Seleção** | A Definir | **Não tributar pelo iMendes** | Parâmetro para restringir a atualização de Tributos do Produto pelo iMendes. Por decisão do Usuário, alguns produtos podem ser tributados seguindo a sua própria interpretação. | Solicitar Acesso Restrito para ativar e desativar o parâmetro.
 
 #### Tipos de Consulta
@@ -117,6 +119,7 @@ Método | Tipo de Consulta | Descritivo | Validações | API a Consumir | Tags d
 **Método 1** | **Código de Barras EAN/GTIN e Descrição** | Consultar a Tributação do Produto utilizando o Código de Barras EAN/GTIN e a Descrição do Produto | Identificar se o Código é um EAN válido, considerando tamanho de 8, 12, 13 ou 14 dígitos. Se EAN válido, identificar se o Prefixo do Código de Barras inicia em 789 ou 790, e enviar origem igual a 0, caso contrário enviar origem igual a 8. Capturar o retorno dos dados.| **Saneamento** |```"codigo":"EAN", "codInterno":"N", "codIMendes":"", "descricao":"DESCRICAO"```
 **Método 2** |**Apenas Descrição** | Consultar a Tributação de um Produto utilizando a Descrição. Capturar a lista de Produtos semelhantes, e permitir vincular um Produto iMendes com o Produto corrente. | Permitir vincular apenas um Produto iMendes com um Produto cadastrado. Criar acesso restrito para esta operação. Identificar se o Produto está sem Código de Barras e não vinculado a um Código iMendes.|**Envia/Recebe Dados**| ```"nomeservico":"DESCPRODUTOS", "dados":"CNPJ\|DESCRICAO" ```
 **Método 3** | **Código iMendes e Descrição** | Consultar a Tributação do Produto utilizando o Código iMendes previamente vinculado. Capturar o retorno normalmente como ocorre no Método 1 | Identificar se o Produto possui um Código iMendes, se sim, utilizar esta informação para localizar a tributação. | **Saneamento** | ```"codIMendes":"CODIGOVINCULADO", "descricao":"DESCRICAO"```
+**Método 4** | **Código Interno** | Consultar a Tributação do Produto utilizando o Código Interno do Produto previamento classificado pela iMendes | ```"codInterno":"CODIGOINTERNO"```
 
 #### Fluxo de Decisão do Método de Consulta
 - ![Fluxo de Decisão do Método de Consulta](./Flow-Decision-Method.jpeg)
@@ -212,6 +215,12 @@ Tag Pai | Campo Retornado | Campo Destino | Descritivo | Tratamento
 [Voltar ao Sumário](#sumario)
 
 ## Recurso 2 - Consulta Tributos em Lote - Gerenciador de Tributação
+Nesta Seção, são descritos os Requisitos para Consulta de Tributação de vários produtos em Lote, que atende aos requisitos da iMendes para homologação. Este recurso também permitirá ao usuário enviar o próprio Cadastro de Produtos para revisão tributária pela iMendes.
+
+### Regras da Consulta em Lote
+Regra | Descritivo | Limite Máximo | Limite Recomendado | Validações
+:---|:---|:---:|:---:|:---
+
 
 ### Métodos Básicos
 ### Métodos Avançados
