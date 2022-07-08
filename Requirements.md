@@ -109,7 +109,7 @@ Tipo | Posicionamento | Nome/Texto | Descritivo | Validações
 :------|:------|:------|:------|:------
 **Campo**|**Grupo Dados do Produto**|Código iMendes| Campo para armazenar e exibir o Código iMendes quando ocorrer o vínculo efetuado pelo Usuário | Deve ser do Tipo Inteiro e Somente leitura.
 **Campo** | A Definir |Auditado por iMendes| Campo para armazenar e exibir a informação de que o Produto teve a tributação auditada/atualizada pela iMendes. Complementar esta informação com a Data e Hora da última atualização tributária | Somente leitura e visualmente destacado
-**Campo** | A Definir |Enviado para Sanemamento| Campo para armazenar e exibir a informação quando o Produto foi enviado para a iMendes classificar e tributar. Será utilizado para identificar que produtos estão pendentes de tributação na iMendes, e como *flag* para apontar que precisa receber atualização. Complementar esta informação com a Data e Hora do envio | Somente leitura e visualmente destacado
+**Campo** | A Definir |Enviado para Saneamento| Campo para armazenar e exibir a informação quando o Produto foi enviado para a iMendes classificar e tributar. Será utilizado para identificar que produtos estão pendentes de tributação na iMendes, e como *flag* para apontar que precisa receber atualização. Complementar esta informação com a Data e Hora do envio | Somente leitura e visualmente destacado
 **Caixa de Seleção** | A Definir | **Não tributar pelo iMendes** | Parâmetro para restringir a atualização de Tributos do Produto pelo iMendes. Por decisão do Usuário, alguns produtos podem ser tributados seguindo a sua própria interpretação. | Solicitar Acesso Restrito para ativar e desativar o parâmetro.
 
 #### Tipos de Consulta
@@ -120,7 +120,7 @@ Método | Tipo de Consulta | Descritivo | Validações | API a Consumir | Tags d
 **Método 1** | **Código de Barras EAN/GTIN e Descrição** | Consultar a Tributação do Produto utilizando o Código de Barras EAN/GTIN e a Descrição do Produto | Identificar se o Código é um EAN válido, considerando tamanho de 8, 12, 13 ou 14 dígitos. Se EAN válido, identificar se o Prefixo do Código de Barras inicia em 789 ou 790, e enviar origem igual a 0, caso contrário enviar origem igual a 8. Capturar o retorno dos dados.| **Saneamento** |```"codigo":"EAN", "codInterno":"N", "codIMendes":"", "descricao":"DESCRICAO"```
 **Método 2** |**Apenas Descrição** | Consultar a Tributação de um Produto utilizando a Descrição. Capturar a lista de Produtos semelhantes, e permitir vincular um Produto iMendes com o Produto corrente. | Permitir vincular apenas um Produto iMendes com um Produto cadastrado. Criar acesso restrito para esta operação. Identificar se o Produto está sem Código de Barras e não vinculado a um Código iMendes.|**Envia/Recebe Dados**| ```"nomeservico":"DESCPRODUTOS", "dados":"CNPJ\|DESCRICAO" ```
 **Método 3** | **Código iMendes e Descrição** | Consultar a Tributação do Produto utilizando o Código iMendes previamente vinculado. Capturar o retorno normalmente como ocorre no Método 1 | Identificar se o Produto possui um Código iMendes, se sim, utilizar esta informação para localizar a tributação. | **Saneamento** | ```"codIMendes":"CODIGOVINCULADO", "descricao":"DESCRICAO"```
-**Método 4** | **Código Interno** | Consultar a Tributação do Produto utilizando o Código Interno do Produto previamento classificado pela iMendes | ```"codInterno":"CODIGOINTERNO"```
+**Método 4** | **Código Interno** | Consultar a Tributação do Produto utilizando o Código Interno do Produto previamento classificado pela iMendes |Identificar se o possui o campo "Enviado para Saneamento" igual a "Sim" |**Saneamento**| ```"codInterno":"CODIGOINTERNO"```
 
 #### Fluxo de Decisão do Método de Consulta
 - ![Fluxo de Decisão do Método de Consulta](./Flow-Decision-Method.jpeg)
@@ -234,7 +234,9 @@ Item | Controle | Recurso | Descritivo | Grau de Importância
 3 | Permitir Consultar Tributos via Cadastro de Produtos | Chave de Acesso | Solicitar Chave de Acesso para Usuário realizar a Consulta Tributária através do Cadastro de Produtos | **Alto**
 3 | Permitir Gravar Atualização de Tributação no Cadastro de Produtos | Chave de Acesso | Solicitar Chave de Acesso para evitar que um Usuário não autorizado e com acesso ao Cadastro grave uma Tributação através do Cadastro de Produtos | **Alto**
 3 | Permitir Gravar Atualização **Parcial** de Tributação no Cadastro de Produtos | Chave de Acesso | Solicitar Chave de Acesso para evitar que um Usuário autorizado grave Campos Específicos de tributação (não todos) através do Cadastro de Produtos | **Alto**
-4 | Permitir Reverter, a um estado anterior, Dados Tributários alterados pela iMendes | Chave de Acesso
+4 | Permitir Reverter, a um estado anterior, Dados Tributários alterados pela iMendes | Chave de Acesso | Solicitar Chave de Acesso para restringir e registrar que o Usuário reverteu dados de tributação atuais para uma versão do histórico do Produto | **Alto**
+5 | Permitir vincular um Código iMendes a um Produto sem Código de Barras | Chave de Acesso | Solicitar Chave de Acesso para restringir e registrar que o usuário está vinculando um Produto Cadastrado com um Código iMendes através de uma Pesquisa de Produto por Descrição. Esta operação assegura ciência da operação pelo usuário | **Alto**
+
 
 ## Tabela de Validações do MVP
 
