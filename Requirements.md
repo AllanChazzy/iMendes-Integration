@@ -7,6 +7,8 @@
   - [Cadastro de Empresas](#cadastro-de-empresas)
   - [Parâmetros de Comunicação](#parâmetros-de-comunicação)
   - [Regras Parametrizáveis](#regras-parametrizáveis)
+  - [Finalidade da Operação](#finalidade-da-operação)
+  - [Perfil Fiscal](#perfil-fiscal)
 - [Requisitos Específicos](#requisitos-específicos)
   - [Recurso 1 - Consulta Tributos - Cadastro de Produtos](#recurso-1---consulta-tributos---cadastro-de-produtos)
     - [Fluxo de Consulta](#fluxo-de-consulta)
@@ -28,7 +30,10 @@
   - [Recurso 2 - Consulta Tributos em Lote - Gerenciador de Tributação](#recurso-2---consulta-tributos-em-lote---gerenciador-de-tributação)
     - [Regras da Consulta em Lote](#regras-da-consulta-em-lote)
     - [Métodos Básicos](#métodos-básicos)
+      - [Interface do Usuário](#interface-do-usuário)
     - [Métodos Avançados](#métodos-avançados)
+      - [Consulta Produtos Pendentes ou Devolvidos](#consulta-produtos-pendentes-ou-devolvidos)
+      - [Remover Produtos da Base iMendes](#remover-produtos-da-base-imendes)
   - [Controle de Acesso e Acessos Restritos](#controle-de-acesso-e-acessos-restritos)
   - [Tabela de Validações do MVP](#tabela-de-validações-do-mvp)
   - [Relatórios Gerenciais - Logs](#relatórios-gerenciais---logs)
@@ -76,6 +81,17 @@ Tipo de Elemento | Pai | Nome/Texto | Descritivo
 **Caixa de Seleção** | **Comportamento** | Permitir Atualização Parcial das Informações Tributárias do Produto | Parâmetro para definir se o usuário terá permissão em aceitar apenas campos específicos da Tributação consultada. Quando esta opção está desativada, não será permitido desmarcar campos na Tela exibição dos Tributos consultados
 **Caixa de Seleção** | **Comportamento** | Permitir consultar mais de uma UF no iMendes | Parâmetro para definir se o usuário terá permissão em consultar mais de uma UF de destino em uma Requisição. Requer tratamento específico para armazenar os dados, e efetuar o correto tratamento e aplicação da regra.
 **Caixa de Seleção** | **Comportamento** | Permitir consultar mais de uma Característica Tributária no iMendes | Parâmetro para definir se o usuário terá permissão em consultar mais de uma Característica Tributária de destino em uma Requisição. Requer tratamento específico para armazenar os dados, e efetuar o correto tratamento e aplicação da regra.
+
+## Finalidade da Operação
+A Consulta iMendes requer que uma Operação seja definida durante a composição da Consulta Tributária, que deve indicar um **Código CFOP** (correto ou não, mas válido e coeso com a operação). Deste modo, é necessário que o **Cadastro de Finalidade de Operações** seja adequado para compor a estrutura da requisição, e para que a criação de Regras Fiscais de Entrada e Saída seja possível. As alterações estão descritas abaixo:
+
+Tipo de Elemento | Nome/Texto | Descritivo | Validações
+:---|:---|:---|:---
+Campo | Tipo de Movimentação | Campo para informar se a Finalidade da Operação é **Entrada ou Saída** | Obrigatório preenchimento/definição
+Campo | CFOP Padrão | Campo para informar o Código do CFOP Padrão para a Operação cadastrada | Validar se CFOP é válido, se existe na Tabela de CFOPs do Sistema Ganso definido como **Entrada ou Saída**, e se o primeiro dígito é compatível com o Tipo de Movimentação: 1,2,3 para **Entrada** / 5,6,7 para **Saída**
+
+## Perfil Fiscal
+Além de uma Operação bem definida, a iMendes requer que seja enviada uma **Característica Tributária** que no Sistema Ganso é definido como **Perfil Fiscal**. A partir desta integração, esta informação é essencial para que o processo de Consulta ocorra de maneira assertiva, e portanto, quando houver integração iMendes ativada, deve ser obedecida a Tabela fornecida pela iMendes. Abaixo estão descritas as mudanças necessárias no Cadastro de **Perfil Fiscal**
 
 [Voltar ao Sumário](#sumario)
 
@@ -145,7 +161,7 @@ Substuto Tributário | ```"substICMS"``` | Caractere | Indicativo de Emitente Su
 Dia | ```"Dia"``` | Número | Dia da Vigência combinada com Mês e Ano para consultas específicas por Data | - | Não
 Mês | ```"Mês"``` | Número | Mês da Vigência combinada com Dia e Ano para consultas específicas por Data | - | Não
 Ano | ```"Ano"``` | Número | Ano da Vigência combinada com Dia e Mês para consultas específicas por Data | - | Não
-Interdependente | interdependente | Caractere | Informação específica. Enviar sempre como "N" | - | Não
+Interdependente | ```"interdependente"``` | Caractere | Informação específica. Enviar sempre como "N" | - | Não
 
 Coletados os dados do Emitente, é necessário coletar o **Perfil** a ser consultado. Os dados necessários foram classificadas e organizadas, e mesmo os não obrigatórios, devem ser enviadas com valores padrão. Conforme análise, o **objetivo de Consulta através do Cadastro** é obter dados para **Saída na Operação de Venda ao Consumidor (NFC-e)**, portanto os parâmetros definidos abaixo devem ser considerados em seus **Valores Padrão**:
 
@@ -241,7 +257,7 @@ Tag Pai | Campo Retornado | Campo Destino | Descritivo | Tratamento
 ```CaracTrib``` | ```fCP``` | *percentual_fcp** | Percentual de Fundo de Combate à Pobreza de Entrada | Informar no campo de destino o valor retornado
 ```CaracTrib``` | ```codBenef``` | cod_beneficio_fiscal | Código do Benefício Fiscal | Informar no campo de destino o valor retornado
 ```CaracTrib``` | ```pDifer``` | *percentual_diferimento** | Percentual de Diferimento de Entrada | Informar no campo de destino o valor retornado
-```infPDV``` | ```pICMSPDV``` | codigo_tributo | Alíquota do ICMS de Saída | Gravar o Código do Tributo, resultante de uma consulta na Tabela **produto_tributo** onde o campo "situacao" seja igual a 0 e "cst" seja igual ao valor retornado e "situacao_tributaria" seja igual ao campo **simbPDV** da Tag Pai **infPDV** e gravar no campo relativo o "codigo" encontrado.
+```infPDV``` | ```pICMSPDV``` | codigo_tributo | Alíquota do ICMS de Saída ECF/NFC-e | Gravar o Código do Tributo, resultante de uma consulta na Tabela **produto_tributo** onde o campo "situacao" seja igual a 0 e "cst" seja igual ao valor retornado e "situacao_tributaria" seja igual ao campo **simbPDV** da Tag Pai **infPDV** e gravar no campo relativo o "codigo" encontrado.
 
 
 * Os campos sinalizados deverão ser discutidos em reunião de planejamento. Será necessário criar versões para saída estadual e interestadual, se houver desenvolvimento de uma Regra Fiscal de Saída.
@@ -258,9 +274,29 @@ R001 | Limitação de Quantidade de Produtos em Lote | 1000 | 100 | Limitar o En
 R002 | Limitação de Quantidade de UFs de Envio | 26 | 5 | Limitar o Envio de UFs em Lote por Consulta
 R003 | Limitação de Tempo de Resposta da API | 5 min. | 3 min. | Limitar o Tempo de Resposta para efetuar nova Consulta
 
-
 ### Métodos Básicos
+A integração iMendes oferece opção para usuário consultar a tributação de vários produtos em uma única requisição, observando as limitações da API e Regras definidas. Para que o recurso seja oferecido ao usuário, é necessário criar uma **Tela de Consulta em Lotes** que processará os Produtos selecionados pelo Usuário, que será descrita a seguir.
+
+#### Interface do Usuário
+Abaixo estão descritos os elementos indispensáveis em uma Tela para oferecer uma boa experiência do usuário, durante a consulta de tributos por lote.
+
+Tipo | Posicionamento | Nome/Texto | Descritivo | Campos Envolvidos | Validações
+:---|:---|:---|:---|:---|:---
+Grupo | Topo da Tela | Filtros | Grupo de informações contendo os campos necessários para realizar filtros e localizar Produtos para compor um Lote | Empresa Filial, Descrição do Produto, Marca, Seção, Grupo, Subgrupo, Ambiente de Utilização, Fornecedor Padrão, Agrupamento de Preços, Referência Fabricante e Auxiliar, Localização, Status do Produto, Código iMendes, Enviados para Saneamento | Validar: Código da Empresa, Hierarquia de Segmentação, Parâmetro "Não Tributar pelo iMendes" e Enviado para iMendes [Ver Campos do Produto](#campos-necessários)
+Campo | Grupo de Filtros | Limite por Lote | Campo para usuário informar quantos produtos serão enviados no Lote de Consulta. Regra 001 da [Consulta em Lote](#regras-da-consulta-em-lote) | Parametrização do Limite de envio de Produtos em Lote | Restringir envio de Lote de Produtos acima do Limite de 1000 e obedecer o Parâmetro Configurado
+Botão | Grupo de Filtros | Pesquisar Produtos | Ação para Usuário acionar a pesquisa de produtos com os critérios informados | Todos os dados informados | Se nenhum filtro for preenchido, informar ao usuário que a Consulta retornará todos os Produtos, contudo apenas 1000 produtos poderão ser enviados de uma só vez devido ao Limite de Envio por lote.
+Campo | Grupo Operações | Finalidade da Operação | Campo para definir a Natureza da Operação do Perfil a ser Consultada para os Respectivos Produtos. A operação trata-se do ```"cfop"``` e estas operações deverão ser definidas a partir da integração, o usuário não poderá definir este código manualmente e sim, o Sistema oferecer as Finalidades Cadastradas para Consulta. A iMendes requer uma Operação por Requisição, caso houver necessidade em Consultar mais de uma Operação para os mesmos produtos, é necessário criar uma Requisição para cada Operação | Finalidade da Operação. [Ver Seção Finalidade da Operação](#finalidade-da-operação) | Informar pelo menos uma Finalidade de Operação
+Campo | Grupo Operações | Característica Tributária | Campo para definir a Característica Tributária do Perfil Consultado | Perfil Fiscal. [Ver Perfil Fiscal]() | Informar pelo menos uma Característica Tributária
+Grade | Grupo Produtos | Relação de Produtos Filtrados | Grade que exibe todos os Produtos encontrados com os filtros informados pelo Usuário permitindo selecionar apenas 1000 por vez. | Código do Produto, Código de Barras, NCM, CEST, Descrição, Marca, Seção, Grupo e Subgrupo | Selecionar apenas 1000 Produtos por vez. Informar ao Usuário o Limite quando atingido.
+Texto | Abaixo do Grupo Produtos | Total Selecionado e Total de Produtos | Texto que exibe a contagem de Produtos selecionados pelo Usuário, e o Total Listado na pesquisa realizada pelo menos utilizando os filtros estabelecidos no topo da tela. | Total Selecionado / Total Listado | - 
+
+Funções 
+
+  
+
 ### Métodos Avançados
+#### Consulta Produtos Pendentes ou Devolvidos
+#### Remover Produtos da Base iMendes
 
 ## Controle de Acesso e Acessos Restritos
 Item | Controle | Recurso | Descritivo | Grau de Importância
@@ -268,10 +304,10 @@ Item | Controle | Recurso | Descritivo | Grau de Importância
 1 | Alterar Configurações da Integração iMendes | Chave de Acesso | Solicitar Chave de Operação Especial para evitar que o Usuário ou Técnico faça alterações nas URLs de Comunicação, Senha e outras configurações da integração iMendes | **Alto**
 2 | Ativar ou Desativar o parâmetro para Atualizar Tributos dos Produtos Automaticamente | Chave de Acesso | Solicitar Chave de Operação Especial para evitar que o Usuário Ative ou Desative a atualização automática de Tributação quando houver mudanças | **Médio**
 3 | Permitir Consultar Tributos via Cadastro de Produtos | Chave de Acesso | Solicitar Chave de Acesso para Usuário realizar a Consulta Tributária através do Cadastro de Produtos | **Alto**
-3 | Permitir Gravar Atualização de Tributação no Cadastro de Produtos | Chave de Acesso | Solicitar Chave de Acesso para evitar que um Usuário não autorizado e com acesso ao Cadastro grave uma Tributação através do Cadastro de Produtos | **Alto**
-3 | Permitir Gravar Atualização **Parcial** de Tributação no Cadastro de Produtos | Chave de Acesso | Solicitar Chave de Acesso para evitar que um Usuário autorizado grave Campos Específicos de tributação (não todos) através do Cadastro de Produtos | **Alto**
-4 | Permitir Reverter, a um estado anterior, Dados Tributários alterados pela iMendes | Chave de Acesso | Solicitar Chave de Acesso para restringir e registrar que o Usuário reverteu dados de tributação atuais para uma versão do histórico do Produto | **Alto**
-5 | Permitir vincular um Código iMendes a um Produto sem Código de Barras | Chave de Acesso | Solicitar Chave de Acesso para restringir e registrar que o usuário está vinculando um Produto Cadastrado com um Código iMendes através de uma Pesquisa de Produto por Descrição. Esta operação assegura ciência da operação pelo usuário | **Alto**
+4 | Permitir Gravar Atualização de Tributação no Cadastro de Produtos | Chave de Acesso | Solicitar Chave de Acesso para evitar que um Usuário não autorizado e com acesso ao Cadastro grave uma Tributação através do Cadastro de Produtos | **Alto**
+5 | Permitir Gravar Atualização **Parcial** de Tributação no Cadastro de Produtos | Chave de Acesso | Solicitar Chave de Acesso para evitar que um Usuário autorizado grave Campos Específicos de tributação (não todos) através do Cadastro de Produtos | **Alto**
+6 | Permitir Reverter, a um estado anterior, Dados Tributários alterados pela iMendes | Chave de Acesso | Solicitar Chave de Acesso para restringir e registrar que o Usuário reverteu dados de tributação atuais para uma versão do histórico do Produto | **Alto**
+7 | Permitir vincular um Código iMendes a um Produto sem Código de Barras | Chave de Acesso | Solicitar Chave de Acesso para restringir e registrar que o usuário está vinculando um Produto Cadastrado com um Código iMendes através de uma Pesquisa de Produto por Descrição. Esta operação assegura ciência da operação pelo usuário | **Alto**
 
 
 ## Tabela de Validações do MVP
