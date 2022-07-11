@@ -15,11 +15,13 @@
       - [Campos Necessários](#campos-necessários)
       - [Tipos de Consulta](#tipos-de-consulta)
       - [Fluxo de Decisão do Método de Consulta](#fluxo-de-decisão-do-método-de-consulta)
-      - [Perfil de Envio](#perfil-de-envio)
+      - [Composição da Tag do Emitente ```"emit"```](#composição-da-tag-do-emitente-emit)
+      - [Composição da Tag Perfil](#composição-da-tag-perfil)
+      - [Composição da Tag de Produtos ```"produtos"```](#composição-da-tag-de-produtos-produtos)
       - [Composição da Requisição - Resumo da Operação de Consulta](#composição-da-requisição---resumo-da-operação-de-consulta)
   - [Captura do Retorno das Informações](#captura-do-retorno-das-informações)
     - [Histórico de Consultas](#histórico-de-consultas)
-      - [Atualizações Tributárias](#atualizações-tributárias)
+      - [Atualizações Tributárias - Exibição de Dados](#atualizações-tributárias---exibição-de-dados)
     - [Relacionamento de Dados - Retorno iMendes x Ganso](#relacionamento-de-dados---retorno-imendes-x-ganso)
       - [Destino: Tabela Produto](#destino-tabela-produto)
       - [Destino: Tabela Produto Parâmetros](#destino-tabela-produto-parâmetros)
@@ -60,6 +62,7 @@ Tipo de Elemento | Pai | Nome/Texto | Descritivo
 **Botão de Seleção** | **URLs da API** | Versão | Seleção da Versão da API contratada. Disponibilizar as versões 2.0 e 3.0 de seleção única (somente uma das opções pode ser selecionada)
 **Campo Texto** | **URLs da API** | Tempo de Resposta | Timeout ou Tempo de Resposta máximo da API. Deve ser numérico e interpretado como "segundos". Valor padrão: 15 segundos
 **Botão** | **URLs da API** | Verificar Status | Botão para testar a Conectividade com as APIs utilizando os dados informados. Deve retornar uma mensagem de Sucesso ou Falha, para ambas APIs.
+**Botão de Seleção** | **URLs da API** | Ambiente | Seleção do Ambiente de Comunicação ativado. Pode ser definido entre **1 = Homologação e 2 = Produção**
 
 ## Regras Parametrizáveis
 Tipo de Elemento | Pai | Nome/Texto | Descritivo
@@ -125,9 +128,26 @@ Método | Tipo de Consulta | Descritivo | Validações | API a Consumir | Tags d
 #### Fluxo de Decisão do Método de Consulta
 - ![Fluxo de Decisão do Método de Consulta](./Flow-Decision-Method.jpeg)
 
-Além dos Métodos de Consulta, outras informações que compõem o **Perfil** a ser consultado são necessárias para envio da Requisição. Estas informações foram classificadas e organizadas, e mesmo as não obrigatórias, devem ser enviadas com valores padrão. Conforme análise, o objetivo de Consulta através do Cadastro é obter dados para **Saída na Operação de Venda ao Consumidor (NFC-e)**, portanto os parâmetros definidos abaixo devem ser considerados em seus **Valores Padrão**:
+Além dos Métodos de Consulta, para realização da Consulta, é necessário coletar as informações para geração da Requisição ```JSON```, iniciando pela Tag ```"emit"```:
 
-#### Perfil de Envio
+#### Composição da Tag do Emitente ```"emit"```
+Dado | Tag | Tipo | Descritivo | Origem dos Dados | Obrigatório
+:---|:---|:---|:---|:---|:---
+Ambiente | ```"amb"``` | Código | Tipo de Ambiente de Envio da Requisição. 1 = Homologação. 2 = Produção | **Parâmetros do Sistema/Aba iMendes** | **Sim**
+CNPJ | ```"cnpj"``` | Caractere | CNPJ do Emitente da Consulta (Cliente) | **Cadastro de Empresas/CNPJ** | **Sim**
+CRT | ```"crt"``` | Código | Código do CRT da Empresa. 1 = Simples Nacional, 2 = Simples Nacional com excesso de sublimite ou 3 = Regime Normal | **Cadastro de Empresas/CRT** | **Sim**
+Regime Tributário | ```"regimeTrib"``` | Caractere | Regime Tributário da Empresa. Complemento do CRT 3. Pode ser definido entre 'LR - Lucro Real' e 'LP - Lucro Presumido' | **Cadastro de Empresas/Regime Tributário** | **Sim**
+UF | ```"uf"``` | Caractere | UF do Emitente | **Cadastro de Empresas/UF** | **Sim**
+CNAE | ```"cnae"``` | Caractere | CNAE do Emitente | **Cadastro de Empresas/CNAE** | Não
+Substuto Tributário | ```"substICMS"``` | Caractere | Indicativo de Emitente Substituto Tributário. Se houver uma Inscrição Estadual de Substituto Tributário informada no Cadastro de Empresas, deve ser enviado esta informação tanto na tag ```"emit"``` quando na Tag ```"produtos"``` | **Cadastro de Empresas/Inscrição Substituto Tributário** | Não
+Dia | ```"Dia"``` | Número | Dia da Vigência combinada com Mês e Ano para consultas específicas por Data | - | Não
+Mês | ```"Mês"``` | Número | Mês da Vigência combinada com Dia e Ano para consultas específicas por Data | - | Não
+Ano | ```"Ano"``` | Número | Ano da Vigência combinada com Dia e Mês para consultas específicas por Data | - | Não
+Interdependente | interdependente | Caractere | Informação específica. Enviar sempre como "N" | - | Não
+
+Coletados os dados do Emitente, é necessário coletar o **Perfil** a ser consultado. Os dados necessários foram classificadas e organizadas, e mesmo os não obrigatórios, devem ser enviadas com valores padrão. Conforme análise, o **objetivo de Consulta através do Cadastro** é obter dados para **Saída na Operação de Venda ao Consumidor (NFC-e)**, portanto os parâmetros definidos abaixo devem ser considerados em seus **Valores Padrão**:
+
+#### Composição da Tag Perfil
 Dado | Tag | Tipo | Descritivo | Valor Padrão | Obrigatório
 :----|:---|:------|:------|:-------:|:-------:
 UF | ```"uf"``` | Lista de Dados | Lista de UFs para Consulta de Regras. | UF da Empresa Filial Logada |**Sim**
@@ -137,6 +157,17 @@ Finalidade | ```"finalidade"```| Código | Indica a Destinação do Produto para
 Simples Nacional | ```"simplesN"```| Caractere | Indica se o Destinatário da Operação é Simples Nacional ou Não. Preenchido com "S" ou "N". Se CRT da Empresa é igual a 1 ou 2, enviar "S", senão enviar "N". | "N" | Não
 Origem |```"origem"``` | Código | Indica a Origem da Mercadoria. Se Tipo de Consulta igual a Método 1, e Código de Barras não iniciar em 789 ou 790, enviar Código 8. | Código "0" | **Sim**
 Substituição Tributária | ```"substICMS"```| Caractere | Indica se o destinatário é Substituto Tributário. | "N" | Não
+
+Por fim, deve ser gerada a Tag ```"produtos"``` que contém os Produtos a serem Consultados, conforme descrito abaixo:
+
+#### Composição da Tag de Produtos ```"produtos"```
+Dado | Tag | Tipo | Descritivo | Origem dos Dados | Validações | Obrigatório
+:---|:---|:---|:---|:---|:---|:---
+Código | ```"codigo"``` | Código | Código de Barras EAN/GTIN ou Código Interno do Produto quando o mesmo foi enviado previamente para Saneamento pela iMendes | **Cadastro de Produtos/Código** | Verificar o Método de Consulta utilizado para preenchimento deste campo. [Ver Métodos de Consulta](#tipos-de-consulta) | **Sim**
+Código Interno | ```"codInterno"``` | Caractere | Indicativo "Sim" ou "Não" para consulta via Código Interno, quando o Produto foi enviado previamente para Saneamento pela iMendes | "S" ou "N" | Verificar se o Produto está marcado como "Enviado para Saneamento" e o Método de Consulta utilizado. [Ver Métodos de Consulta](#tipos-de-consulta) | **Sim** 
+Descrição | ```"descricao"```| Caractere | Descrição Completa do Produto | **Cadastro de Produtos/Descrição** | Enviar a Desrição Completa do Produto para que a resposta da API seja eficiente. | **Sim**
+Código iMendes | ```"codImendes"```| Código | Código Único fornecido pela iMendes. Quando um produto é vinculado ao código iMendes esta informação poderá ser utilizada para consulta. | **Cadastro de Produtos/Codigo iMendes** | Verificar o preenchimento do Código iMendes que indica que houve a vinculação anterior. Utilizar o método de consulta que trata utiliza este código. [Ver Métodos de Consulta](#tipos-de-consulta) | **Não**
+NCM | ```"ncm"```| Caractere | Nomenclatura Comum do Mercosul | **Cadastro de Produtos/NCM** | Verificar se NCM está preenchido no Cadastro do Produto. Esta informação não é obrigatória e a API retornará o Dado correto | **Não**
 
 #### Composição da Requisição - Resumo da Operação de Consulta
 1. Coleta dados do **Cadastro de Empresa** para gerar a gera a Tag ```"emit"```
@@ -162,7 +193,7 @@ Dados Ignorados| Armazenar os Campos e Dados que foram ignorados pelo Usuário d
 
 Após captura e armazenamento dos dados consultados, um dos Requisitos para Homologação descreve que o Usuário precisa ter liberdade em **Aceitar** as atualizações Tributárias para o Produto total ou parcial, para gravá-las no Cadastro do Produto Consultado. Deste modo, é necessário exibir em Tela este retorno contendo todos os Dados **Antes e Depois**, destacando claramente quais apresentam divergências. Os elementos necessários nesta exibição estão descritas abaixo:
 
-#### Atualizações Tributárias
+#### Atualizações Tributárias - Exibição de Dados
 Campo | Informação de exibição | Validações
 :---|:---|:---
 Código Interno | Código do Produto Ganso | Somente Leitura
