@@ -16,7 +16,7 @@
       - [Tipos de Consulta](#tipos-de-consulta)
       - [Fluxo de Decisão do Método de Consulta](#fluxo-de-decisão-do-método-de-consulta)
       - [Composição da Tag do Emitente ```"emit"```](#composição-da-tag-do-emitente-emit)
-      - [Composição da Tag Perfil](#composição-da-tag-perfil)
+      - [Composição da Tag Perfil ```"perfil"```](#composição-da-tag-perfil-perfil)
       - [Composição da Tag de Produtos ```"produtos"```](#composição-da-tag-de-produtos-produtos)
       - [Composição da Requisição - Resumo da Operação de Consulta](#composição-da-requisição---resumo-da-operação-de-consulta)
   - [Captura do Retorno das Informações](#captura-do-retorno-das-informações)
@@ -74,6 +74,8 @@ Tipo de Elemento | Pai | Nome/Texto | Descritivo
 **Caixa de Seleção** | **Comportamento** | Permitir Vincular Produtos utilizando Código iMendes | Permite ao usuário vincular um Produto Cadastrado com um Produto iMendes Consultado por Descrição.
 **Caixa de Seleção** | **Comportamento** | Verificar Alterações de Produtos Automaticamente em: [ x ] dias. | Parâmetro para definir a periodicidade de consulta à atualizações de grades realizadas pelo iMendes. Deve ser numérico e interpretado como "dias". Valor padrão: 15 dias
 **Caixa de Seleção** | **Comportamento** | Permitir Atualização Parcial das Informações Tributárias do Produto | Parâmetro para definir se o usuário terá permissão em aceitar apenas campos específicos da Tributação consultada. Quando esta opção está desativada, não será permitido desmarcar campos na Tela exibição dos Tributos consultados
+**Caixa de Seleção** | **Comportamento** | Permitir consultar mais de uma UF no iMendes | Parâmetro para definir se o usuário terá permissão em consultar mais de uma UF de destino em uma Requisição. Requer tratamento específico para armazenar os dados, e efetuar o correto tratamento e aplicação da regra.
+**Caixa de Seleção** | **Comportamento** | Permitir consultar mais de uma Característica Tributária no iMendes | Parâmetro para definir se o usuário terá permissão em consultar mais de uma Característica Tributária de destino em uma Requisição. Requer tratamento específico para armazenar os dados, e efetuar o correto tratamento e aplicação da regra.
 
 [Voltar ao Sumário](#sumario)
 
@@ -120,7 +122,7 @@ Além dos campos e funções, é necessário criar Métodos de Consulta que trat
 
 Método | Tipo de Consulta | Descritivo | Validações | API a Consumir | Tags de Envio Principais
 :------|:------|:------|:------|:------|:------
-**Método 1** | **Código de Barras EAN/GTIN e Descrição** | Consultar a Tributação do Produto utilizando o Código de Barras EAN/GTIN e a Descrição do Produto | Identificar se o Código é um EAN válido, considerando tamanho de 8, 12, 13 ou 14 dígitos. Se EAN válido, identificar se o Prefixo do Código de Barras inicia em 789 ou 790, e enviar origem igual a 0, caso contrário enviar origem igual a 8. Capturar o retorno dos dados.| **Saneamento** |```"codigo":"EAN", "codInterno":"N", "codIMendes":"", "descricao":"DESCRICAO"```
+**Método 1** | **Código de Barras EAN/GTIN e Descrição** | Consultar a Tributação do Produto utilizando o Código de Barras EAN/GTIN e a Descrição do Produto | Identificar se o Código é um EAN válido, considerando tamanho de 8, 12, 13 ou 14 dígitos. Considerar sempre 14 dígitos para envio, preenchendo com **Zeros** à esquerda caso EAN diferente de tamanho 14. Se EAN válido, identificar se o Prefixo do Código de Barras inicia em "789" ou "790", ou "1789" ou "1790" e enviar origem igual a 0, caso contrário enviar origem igual a 8. Capturar o retorno dos dados pela Tag ```"prodEAN"```.| **Saneamento** |```"codigo":"EAN", "codInterno":"N", "codIMendes":"", "descricao":"DESCRICAO"```
 **Método 2** |**Apenas Descrição** | Consultar a Tributação de um Produto utilizando a Descrição. Capturar a lista de Produtos semelhantes, e permitir vincular um Produto iMendes com o Produto corrente. | Permitir vincular apenas um Produto iMendes com um Produto cadastrado. Criar acesso restrito para esta operação. Identificar se o Produto está sem Código de Barras e não vinculado a um Código iMendes.|**Envia/Recebe Dados**| ```"nomeservico":"DESCPRODUTOS", "dados":"CNPJ\|DESCRICAO" ```
 **Método 3** | **Código iMendes e Descrição** | Consultar a Tributação do Produto utilizando o Código iMendes previamente vinculado. Capturar o retorno normalmente como ocorre no Método 1 | Identificar se o Produto possui um Código iMendes, se sim, utilizar esta informação para localizar a tributação. | **Saneamento** | ```"codIMendes":"CODIGOVINCULADO", "descricao":"DESCRICAO"```
 **Método 4** | **Código Interno** | Consultar a Tributação do Produto utilizando o Código Interno do Produto previamento classificado pela iMendes |Identificar se o possui o campo "Enviado para Saneamento" igual a "Sim" |**Saneamento**| ```"codInterno":"CODIGOINTERNO"```
@@ -147,7 +149,7 @@ Interdependente | interdependente | Caractere | Informação específica. Enviar
 
 Coletados os dados do Emitente, é necessário coletar o **Perfil** a ser consultado. Os dados necessários foram classificadas e organizadas, e mesmo os não obrigatórios, devem ser enviadas com valores padrão. Conforme análise, o **objetivo de Consulta através do Cadastro** é obter dados para **Saída na Operação de Venda ao Consumidor (NFC-e)**, portanto os parâmetros definidos abaixo devem ser considerados em seus **Valores Padrão**:
 
-#### Composição da Tag Perfil
+#### Composição da Tag Perfil ```"perfil"```
 Dado | Tag | Tipo | Descritivo | Valor Padrão | Obrigatório
 :----|:---|:------|:------|:-------:|:-------:
 UF | ```"uf"``` | Lista de Dados | Lista de UFs para Consulta de Regras. | UF da Empresa Filial Logada |**Sim**
@@ -252,6 +254,9 @@ Nesta Seção, são descritos os Requisitos para Consulta de Tributação de vá
 ### Regras da Consulta em Lote
 Regra | Descritivo | Limite Máximo | Limite Recomendado | Validações
 :---|:---|:---:|:---:|:---
+R001 | Limitação de Quantidade de Produtos em Lote | 1000 | 100 | Limitar o Envio de Produtos em Lote por Consulta
+R002 | Limitação de Quantidade de UFs de Envio | 26 | 5 | Limitar o Envio de UFs em Lote por Consulta
+R003 | Limitação de Tempo de Resposta da API | 5 min. | 3 min. | Limitar o Tempo de Resposta para efetuar nova Consulta
 
 
 ### Métodos Básicos
