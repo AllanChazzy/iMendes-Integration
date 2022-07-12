@@ -121,6 +121,8 @@ Código | Descritivo
 
 [Voltar ao Sumário](#sumario)
 
+[Voltar ao Resumo](#resumo)
+
 # Requisitos Específicos
 Nesta seção, são descritos os **Requisitos Obrigatórios** para atender à Homologação e os Recursos mais importantes desta integração, que são:
 - Consulta via Cadastro de Produtos - Cadastrando um Novo Item
@@ -224,6 +226,9 @@ Após a obtenção dos Dados Necessários para envio da Requisição, o **Fluxo 
 - ![Fluxo de Consulta - Novo Produto](./Flow-Consulta-Produto.jpeg)
 
 [Voltar ao Sumário](#sumario)
+
+[Voltar ao Resumo](#resumo)
+
 ## Captura do Retorno das Informações
 Após efetuar a Consulta e obter o retorno com os Dados Tributários, é necessário efetuar a Gravação de Histórico de Consulta. Abaixo são descritos quais são necessários:
 
@@ -290,6 +295,8 @@ Tag Pai | Campo Retornado | Campo Destino | Descritivo | Tratamento
 
 [Voltar ao Sumário](#sumario)
 
+[Voltar ao Resumo](#resumo)
+
 ## Recurso 2 - Consulta Tributos em Lote - Gerenciador de Tributação
 Nesta Seção, são descritos os Requisitos para Consulta de Tributação para vários produtos em um Lote, que atende aos requisitos da iMendes para homologação. Este recurso também permitirá ao usuário enviar o próprio Cadastro de Produtos para revisão tributária pela iMendes.
 
@@ -320,17 +327,20 @@ Botão de Ação | Consultar Tributação | Botão de Ação para ativar a Consu
 Botão de Ação | Verificar Pendentes/Devolvidos | Botão para acionar a API **Envia/Recebe Dados** para verificar os Produtos alterados pela iMendes quando o cadastro de Produtos foi enviado para Saneamento ou para Consultar as Alterações Tributárias | Produtos marcados como "Enviado para Saneamento" [Ver Seção Cadastro de Produtos/Campos Necessários](#campos-necessários) | Verificar Operações Especiais para acionar a função
 
 #### Composições da Consulta em Lote
-Neste tópico, são descritos as composições de Parâmetros e Validações da Rotinas da **Consulta em Lote** devem realizar conforme as **Ações do Usuário**.
+Neste tópico, são descritos as composições de parâmetros e validações necessárias que a **Consulta em Lote** deve realizar conforme as **Ações do Usuário**.
 
 Composição | Validação | Resposta ao Usuário | Dados da Composição | Tags Principais
 :---|:---|:---|:---|:---
-Informar uma Finalidade de Operação do Tipo **Entrada** ou **Saída** e no campo UFs informar a UF da Empresa Filial e Outras UFs | Gerar uma Requisição específica para a UF da Empresa Filial e uma Específica para as demais UFs | Informar que serão geradas duas requisições distintas para API, e que os dados recebidos serão agrupados por UF | Utilizar o CFOP Estadual da Finalidade da Operação para a Requisição da UF da Empresa e o CFOP Interestadual para as demais UFs. Ler a Finalidade do Produto informada na Finalidade da Operação para compor a consulta | ```"perfil/uf"```, ```"perfil/cfop"```, ```"perfil/finalidade"```
-Filtrar e Selecionar Produtos que requerem [Métodos de Consulta](#tipos-de-consulta) distintos | Tratar cada situação distinta para assegurar que a consulta seja realizada utilizando a API correta | Informar ao Usuário que determinados Produtos poderão ser consultados por meios distintos e que o mesmo deverá processar individualmente cada situação | Código iMendes, Enviado para Saneamento | ```"produtos/codigo"```, ```"produtos/codInterno"```, ```"produtos/codImendes"```
-
+Se Informar uma Finalidade de Operação do Tipo **Entrada** ou **Saída** e no campo UFs informar a UF da Empresa Filial e Outras UFs | Gerar uma Requisição específica para a UF da Empresa Filial e uma Específica para as demais UFs | Informar que serão geradas duas requisições distintas para API, e que os dados recebidos serão agrupados por UF | Utilizar o CFOP Estadual da Finalidade da Operação para a Requisição da UF da Empresa e o CFOP Interestadual para as demais UFs. Ler a Finalidade do Produto informada na Finalidade da Operação para compor a consulta | ```"perfil/uf"```, ```"perfil/cfop"```, ```"perfil/finalidade"```
+Se Filtrar e Selecionar Produtos que requerem [Métodos de Consulta](#tipos-de-consulta) distintos | Tratar cada situação distinta para assegurar que a consulta seja realizada utilizando a API correta | Informar ao Usuário que determinados Produtos poderão ser consultados por meios distintos e que o mesmo deverá processar individualmente cada situação | Código iMendes, Enviado para Saneamento | ```"produtos/codigo"```, ```"produtos/codInterno"```, ```"produtos/codImendes"```
 
 
 ### Fluxo de Consulta em Lote
 ![Fluxo de Consulta em Lote](./Batch-Search-Flow.jpeg)
+
+[Voltar ao Sumário](#sumario)
+
+[Voltar ao Resumo](#resumo)
   
 
 ### Métodos Avançados
@@ -364,6 +374,8 @@ VF 4 | Efetuar verificação períodica de Atualizações Tributárias dos Produ
 VF 5 | Criar um Relatório Gerencial para acompanhamento do Histórico de Mudanças Tributárias ocorridas em determinado período | [Relatórios Gerenciais - Logs](#relatórios-gerenciais---logs) |**Alto** | -
 VF 6 | Implementar o **Simulador Tributário** que efetua uma verificação no Cadastro de Produtos e aponta os problemas tributários em Clientes ainda não integrados | - | **Médio** | - 
 VF 7 | Implementar mensagem de **Sugestão de Contratação da iMendes** para captura de novos clientes | - | **Baixo** | -
+
+**Legenda**: MVP - Implementação Mínima | VF - Versão Final
 
 ## Relatórios Gerenciais - Logs
 Construir Relatório de Auditoria dos Produtos iMendes, para exibir o Histórico de Alterações.
