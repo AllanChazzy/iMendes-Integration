@@ -3,6 +3,7 @@
 Índice
 
 - [Introdução](#introdução)
+- [Resumo](#resumo)
 - [Requisitos Iniciais](#requisitos-iniciais)
   - [Cadastro de Empresas](#cadastro-de-empresas)
   - [Parâmetros de Comunicação](#parâmetros-de-comunicação)
@@ -31,7 +32,7 @@
     - [Regras da Consulta em Lote](#regras-da-consulta-em-lote)
     - [Métodos Padrão](#métodos-padrão)
       - [Interface do Usuário](#interface-do-usuário)
-      - [Validações da Interface do Usuário](#validações-da-interface-do-usuário)
+      - [Composições da Consulta em Lote](#composições-da-consulta-em-lote)
     - [Fluxo de Consulta em Lote](#fluxo-de-consulta-em-lote)
     - [Métodos Avançados](#métodos-avançados)
       - [Consulta Produtos Pendentes ou Devolvidos](#consulta-produtos-pendentes-ou-devolvidos)
@@ -50,6 +51,12 @@
 - Nesta integração, o Sistema Ganso comunica-se com o portal tributário do Grupo iMendes através de uma **API**, e realiza a consulta da Tributação dos produtos e retorna as informações. 
 - A consulta pode ocorrer de duas maneiras: **durante a realização de um novo Cadastro** ou **consultando a tributação de um produto Cadastrado** 
 - Para que a integração seja bem sucedida, é necessário que o CNPJ do estabelecimento consulente (Cliente que realizará as consultas) esteja liberado mediante aquisição de licença com o Setor Comercial do Grupo iMendes. (Levando em consideração que a Ganso Sistemas seja um parceiro ativo).
+
+# Resumo
+1. Preparação do Sistema Ganso: Implementar os [Requisitos Iniciais](#requisitos-iniciais)
+2. Etapa 1 - Consulta Básica: Implementar os Requisitos do [Recurso 1](#recurso-1---consulta-tributos---cadastro-de-produtos)
+3. Etapa 2 - Consulta em Lote: Implementar os Requisitos do [Recurso 2](#recurso-2---consulta-tributos-em-lote---gerenciador-de-tributação)
+4. Etapa 3 - Validação da Integração: [Checklist](#tabela-de-validações-do-mvp) do MVP iMendes
 
 # Requisitos Iniciais
 Nesta seção, serão descritos os **Requisitos Iniciais e Obrigatórios** para a continuidade do processo de integração, e descreve os principais parâmetros de Configuração. 
@@ -284,7 +291,7 @@ Tag Pai | Campo Retornado | Campo Destino | Descritivo | Tratamento
 [Voltar ao Sumário](#sumario)
 
 ## Recurso 2 - Consulta Tributos em Lote - Gerenciador de Tributação
-Nesta Seção, são descritos os Requisitos para Consulta de Tributação de vários produtos em Lote, que atende aos requisitos da iMendes para homologação. Este recurso também permitirá ao usuário enviar o próprio Cadastro de Produtos para revisão tributária pela iMendes.
+Nesta Seção, são descritos os Requisitos para Consulta de Tributação para vários produtos em um Lote, que atende aos requisitos da iMendes para homologação. Este recurso também permitirá ao usuário enviar o próprio Cadastro de Produtos para revisão tributária pela iMendes.
 
 ### Regras da Consulta em Lote
 Regra | Descritivo | Limite Máximo | Limite Recomendado | Validações
@@ -312,12 +319,14 @@ Campo | UFs de Origem/Destino | Campo para definir as UFs das quais o usuário d
 Botão de Ação | Consultar Tributação | Botão de Ação para ativar a Consulta em Lote dos produtos selecionados conforme os parâmetros definidos pelo Usuário | Todos os dados informados | -
 Botão de Ação | Verificar Pendentes/Devolvidos | Botão para acionar a API **Envia/Recebe Dados** para verificar os Produtos alterados pela iMendes quando o cadastro de Produtos foi enviado para Saneamento ou para Consultar as Alterações Tributárias | Produtos marcados como "Enviado para Saneamento" [Ver Seção Cadastro de Produtos/Campos Necessários](#campos-necessários) | Verificar Operações Especiais para acionar a função
 
-#### Validações da Interface do Usuário
-Neste tópico, são descritos os comportamentos e interações que as Rotinas da **Consulta em Lote** devem realizar conforme as **Ações do Usuário**.
+#### Composições da Consulta em Lote
+Neste tópico, são descritos as composições de Parâmetros e Validações da Rotinas da **Consulta em Lote** devem realizar conforme as **Ações do Usuário**.
 
-Ação | Validação | Resposta ao Usuário
-:---|:---|:---
-Ação **Consultar Tributos** | Verificar Produtos Marcados pelo Usuário que não possuam Código de Barras GTIN, Código iMendes e que Não foram enviados para Saneamento para iMendes |  Exibir uma mensagem de confirmação informando que "Alguns produtos poderão não obter retorno de tributação", exibir a quantidade de Produtos e Salvar estes para verificação posterior.
+Composição | Validação | Resposta ao Usuário | Dados da Composição | Tags Principais
+:---|:---|:---|:---|:---
+Informar uma Finalidade de Operação do Tipo **Entrada** ou **Saída** e no campo UFs informar a UF da Empresa Filial e Outras UFs | Gerar uma Requisição específica para a UF da Empresa Filial e uma Específica para as demais UFs | Informar que serão geradas duas requisições distintas para API, e que os dados recebidos serão agrupados por UF | Utilizar o CFOP Estadual da Finalidade da Operação para a Requisição da UF da Empresa e o CFOP Interestadual para as demais UFs. Ler a Finalidade do Produto informada na Finalidade da Operação para compor a consulta | ```"perfil/uf"```, ```"perfil/cfop"```, ```"perfil/finalidade"```
+Filtrar e Selecionar Produtos que requerem [Métodos de Consulta](#tipos-de-consulta) distintos | Tratar cada situação distinta para assegurar que a consulta seja realizada utilizando a API correta | Informar ao Usuário que determinados Produtos poderão ser consultados por meios distintos e que o mesmo deverá processar individualmente cada situação | Código iMendes, Enviado para Saneamento | ```"produtos/codigo"```, ```"produtos/codInterno"```, ```"produtos/codImendes"```
+
 
 
 ### Fluxo de Consulta em Lote
