@@ -29,15 +29,20 @@
       - [Destino: Tabela Produto Parâmetros](#destino-tabela-produto-parâmetros)
   - [Recurso 2 - Consulta Tributos em Lote - Gerenciador de Tributação](#recurso-2---consulta-tributos-em-lote---gerenciador-de-tributação)
     - [Regras da Consulta em Lote](#regras-da-consulta-em-lote)
-    - [Métodos Básicos](#métodos-básicos)
+    - [Métodos Padrão](#métodos-padrão)
       - [Interface do Usuário](#interface-do-usuário)
-      - [Comportamento da Interface do Usuário](#comportamento-da-interface-do-usuário)
+      - [Validações da Interface do Usuário](#validações-da-interface-do-usuário)
+    - [Fluxo de Consulta em Lote](#fluxo-de-consulta-em-lote)
     - [Métodos Avançados](#métodos-avançados)
       - [Consulta Produtos Pendentes ou Devolvidos](#consulta-produtos-pendentes-ou-devolvidos)
       - [Remover Produtos da Base iMendes](#remover-produtos-da-base-imendes)
   - [Controle de Acesso e Acessos Restritos](#controle-de-acesso-e-acessos-restritos)
   - [Tabela de Validações do MVP](#tabela-de-validações-do-mvp)
   - [Relatórios Gerenciais - Logs](#relatórios-gerenciais---logs)
+- [Simulações](#simulações)
+  - [Consulta Cadastro de Produtos](#consulta-cadastro-de-produtos)
+  - [Consulta em Lote - Regras de Entrada](#consulta-em-lote---regras-de-entrada)
+  - [Consulta em Lote - Regras de Saída](#consulta-em-lote---regras-de-saída)
 
 # Introdução
 
@@ -82,6 +87,7 @@ Tipo de Elemento | Pai | Nome/Texto | Descritivo
 **Caixa de Seleção** | **Comportamento** | Permitir Atualização Parcial das Informações Tributárias do Produto | Parâmetro para definir se o usuário terá permissão em aceitar apenas campos específicos da Tributação consultada. Quando esta opção está desativada, não será permitido desmarcar campos na Tela exibição dos Tributos consultados
 **Caixa de Seleção** | **Comportamento** | Permitir consultar mais de uma UF no iMendes | Parâmetro para definir se o usuário terá permissão em consultar mais de uma UF de destino em uma Requisição. Requer tratamento específico para armazenar os dados, e efetuar o correto tratamento e aplicação da regra.
 **Caixa de Seleção** | **Comportamento** | Permitir consultar mais de uma Característica Tributária no iMendes | Parâmetro para definir se o usuário terá permissão em consultar mais de uma Característica Tributária de destino em uma Requisição. Requer tratamento específico para armazenar os dados, e efetuar o correto tratamento e aplicação da regra.
+**Campo** | **Comportamento** | Limite de Produtos por Consulta em Lote | Parâmetro para definir um Limite de Produtos a serem enviados em Lote durante uma Consulta Tributária. O Limite máximo da iMendes é de 1000 produtos, contudo deve ser permitido configurar envios menores de acordo a conectividade do Usuário.
 
 ## Finalidade da Operação
 A Consulta iMendes requer que uma Operação seja definida durante a composição da Consulta Tributária, que deve indicar um **Código CFOP** (correto ou não, mas válido e coeso com a operação). Deste modo, é necessário que o **Cadastro de Finalidade de Operações** seja adequado para compor a estrutura da requisição, e para que a criação de Regras Fiscais de Entrada e Saída seja possível. As alterações estão descritas abaixo:
@@ -89,8 +95,9 @@ A Consulta iMendes requer que uma Operação seja definida durante a composiçã
 Tipo de Elemento | Nome/Texto | Descritivo | Validações
 :---|:---|:---|:---
 Campo | Tipo de Movimentação | Campo para informar se a Finalidade da Operação é **Entrada ou Saída** | Obrigatório preenchimento/definição
-Campo | CFOP Padrão | Campo para informar o Código do CFOP Padrão para a Operação cadastrada | Validar se CFOP é válido, se existe na Tabela de CFOPs do Sistema Ganso definido como **Entrada ou Saída**, e se o primeiro dígito é compatível com o Tipo de Movimentação: 1,2,3 para **Entrada** / 5,6,7 para **Saída**
-Campo | Finalidade do Produto | Campo do tipo código para informar se a Finalidade do Produto se enquadra nas opções: 0 = Revenda, 1 = Insumo, 2 = Uso e Consumo ou Ativo Imobilizado | Informar pelo menos um dos códigos da lista 0 = Revenda, 1 = Insumo, 2 = Uso e Consumo ou Ativo Imobilizado
+Campo | CFOP Padrão Estadual | Campo para informar o Código do CFOP Padrão para a Operação Estadual cadastrada | Validar se CFOP é válido, se existe na Tabela de CFOPs do Sistema Ganso definido como **Entrada ou Saída**, e se o primeiro dígito é compatível com o Tipo de Movimentação: 1 para **Entrada** / 5 para **Saída**
+Campo | CFOP Padrão Interestadual | Campo para informar o Código do CFOP Padrão para a Operação cadastrada | Validar se CFOP é válido, se existe na Tabela de CFOPs do Sistema Ganso definido como **Entrada ou Saída**, e se o primeiro dígito é compatível com o Tipo de Movimentação: 2 para **Entrada** / 6 para **Saída**
+Campo | Finalidade do Produto | Campo do tipo código para informar se a Finalidade do Produto se enquadra nas opções: 0 = Revenda, 1 = Insumo ou 2 = Uso e Consumo ou Ativo Imobilizado | Informar pelo menos um dos códigos da lista 0 = Revenda, 1 = Insumo ou 2 = Uso e Consumo ou Ativo Imobilizado. Informação Obrigatória para realizar a consulta.
 
 ## Perfil Fiscal
 Além de uma Operação bem definida, a iMendes requer que seja enviada uma **Característica Tributária** que no Sistema Ganso é definido como **Perfil Fiscal**. A partir desta integração, esta informação é fundamental para que o processo de Consulta ocorra de maneira correta e os dados tributários sejam retornados de acordo com a Operação que será realizada. Portanto, deve ser obedecida a Lista fornecida pela iMendes, conforme tabela abaixo:
@@ -286,30 +293,35 @@ R001 | Limitação de Quantidade de Produtos em Lote | 1000 | 100 | Limitar o En
 R002 | Limitação de Quantidade de UFs de Envio | 26 | 5 | Limitar o Envio de UFs em Lote por Consulta
 R003 | Limitação de Tempo de Resposta da API | 5 min. | 3 min. | Limitar o Tempo de Resposta para efetuar nova Consulta
 
-### Métodos Básicos
-A integração iMendes oferece opção para usuário consultar a tributação de vários produtos em uma única requisição, observando as limitações da API e Regras definidas. Para que o recurso seja oferecido ao usuário, é necessário criar uma **Tela de Consulta em Lotes** que processará os Produtos selecionados pelo Usuário, que será descrita a seguir.
+### Métodos Padrão
+A integração iMendes oferece opção para usuário consultar a tributação de vários produtos em uma única requisição, observando as limitações da API e Regras definidas. Para que o recurso seja oferecido ao usuário, é necessário criar uma **Tela de Consulta em Lotes** que processará os Produtos selecionados pelo Usuário, conforme especificações a seguir.
 
 #### Interface do Usuário
-Abaixo estão descritos os elementos indispensáveis em uma Tela para oferecer uma boa experiência do usuário, durante a consulta de tributos por lote.
+Os elementos necessários em uma interface de consulta em lote são:
 
-Tipo | Posicionamento | Nome/Texto | Descritivo | Campos Envolvidos | Validações
-:---|:---|:---|:---|:---|:---
-Grupo | Topo da Tela | Filtros | Grupo de informações contendo os campos necessários para realizar filtros e localizar Produtos para compor um Lote | Empresa Filial, Descrição do Produto, Marca, Seção, Grupo, Subgrupo, Ambiente de Utilização, Fornecedor Padrão, Agrupamento de Preços, Referência Fabricante e Auxiliar, Localização, Status do Produto, Código iMendes, Enviados para Saneamento | Validar: Código da Empresa, Hierarquia de Segmentação, Parâmetro "Não Tributar pelo iMendes" e Enviado para iMendes [Ver Campos do Produto](#campos-necessários)
-Campo | Grupo de Filtros | Limite por Lote | Campo para usuário informar quantos produtos serão enviados no Lote de Consulta. [Ver Regra 001 Consulta em Lote](#regras-da-consulta-em-lote) | Parametrização do Limite de envio de Produtos em Lote | Restringir envio de Lote de Produtos acima do Limite de 1000 e obedecer o Parâmetro Configurado
-Botão | Grupo de Filtros | Pesquisar Produtos | Ação para Usuário acionar a pesquisa de produtos com os critérios informados | Todos os dados informados | Se nenhum filtro for preenchido, informar ao usuário que a Consulta retornará todos os Produtos, contudo apenas 1000 produtos poderão ser enviados de uma só vez devido ao Limite de Envio por lote.
-Campo | Grupo Operações | Finalidade da Operação | Campo para definir a Natureza da Operação do Perfil a ser Consultada para os Respectivos Produtos. A operação trata-se do ```"cfop"``` e estas operações deverão ser definidas a partir da integração, o usuário não poderá definir este código manualmente e sim, o Sistema oferecer as Finalidades Cadastradas para Consulta. A iMendes requer uma Operação por Requisição, caso houver necessidade em Consultar mais de uma Operação para os mesmos produtos, é necessário criar uma Requisição para cada Operação | Finalidade da Operação. [Ver Seção Finalidade da Operação](#finalidade-da-operação) | Informar pelo menos uma Finalidade de Operação
-Campo | Grupo Operações | Característica Tributária | Campo para definir a Característica Tributária do Perfil Consultado | Perfil Fiscal. [Ver Perfil Fiscal](#perfil-fiscal) | Informar pelo menos uma Característica Tributária
-Campo | Grupo Operações | UF de Origem/Destino | Campo para definir as UFs das quais o usuário deseja obter a tributação para a Operação definida | Campo Livre | Limitar Preenchimento a 5 UFs. [Ver Regra R002 da Consulta em Lote](#regras-da-consulta-em-lote)
-Grade | Grupo Produtos | Relação de Produtos Filtrados | Grade que exibe todos os Produtos encontrados com os filtros informados pelo Usuário permitindo selecionar apenas 1000 por vez. | Código do Produto, Código de Barras, NCM, CEST, Descrição, Marca, Seção, Grupo e Subgrupo | Selecionar apenas 1000 Produtos por vez. Informar ao Usuário o Limite quando atingido.
-Texto | Abaixo do Grupo Produtos | Total Selecionado e Total de Produtos | Texto que exibe a contagem de Produtos selecionados pelo Usuário, e o Total Listado na pesquisa realizada pelo menos utilizando os filtros estabelecidos no topo da tela. | Total Selecionado / Total Listado | - 
+Elemento |  Nome/Texto | Descritivo | Conjunto de dados | Validações
+:---|:---|:---|:---|:---
+Grupo de Filtros | Filtros | Deve conter os campos necessários para realizar filtros e localizar Produtos para compor um Lote | Empresa Filial, Descrição do Produto, Marca, Seção, Grupo, Subgrupo, Ambiente de Utilização, Fornecedor Padrão, Agrupamento de Preços, Referência Fabricante e Auxiliar, Localização, Status do Produto, Produtos com Código iMendes, Produtos Enviados para Saneamento | Validar: Código da Empresa, Hierarquia de Segmentação, Parâmetro "Não Tributar pelo iMendes" e Enviado para iMendes [Ver Campos do Produto](#campos-necessários)
+Campo | Limite por Lote | Campo para usuário informar quantos produtos serão enviados no Lote de Consulta. [Ver Regra 001 Consulta em Lote](#regras-da-consulta-em-lote) | Parâmetro do Limite de envio de Produtos em Lote | Restringir envio de Lote de Produtos acima do Limite de 1000 ou obedecer o Parâmetro Configurado [Ver Parâmetros](#regras-parametrizáveis)
+Botão de Ação | Pesquisar Produtos | Ação para Usuário acionar a pesquisa de produtos com os critérios informados no Grupo de Filtros | Todos os dados informados | Se nenhum filtro for preenchido, informar ao usuário que a Consulta retornará todos os Produtos, contudo apenas 1000 produtos poderão ser enviados de uma só vez devido ao Limite de Envio por lote.
+Grade com Caixa de Seleção | Relação de Produtos Filtrados | Grade que exibe todos os Produtos encontrados com os filtros informados pelo Usuário permitindo selecionar apenas 1000 por vez. | Código do Produto, Código de Barras, NCM, CEST, Descrição, Marca, Seção, Grupo e Subgrupo | Selecionar apenas 1000 Produtos por vez. Informar ao Usuário o Limite quando atingido.
+Texto Informativo | Total Selecionado e Total de Produtos Listados | Texto que exibe a contagem de Produtos selecionados pelo Usuário, e o Total Listado na pesquisa realizada pelo mesmo utilizando os filtros estabelecidos no topo da tela. | Total Selecionado / Total Listado | - 
+Caixa de Combinação | Finalidade da Operação | Campo para definir a Natureza da Operação do Perfil a ser Consultado para os Respectivos Produtos. A operação trata-se do ```"cfop"``` e estas operações deverão ser definidas a partir da integração, o usuário não poderá definir este código manualmente e sim, o Sistema oferecer as Finalidades Cadastradas para Consulta. A iMendes requer uma Operação por Requisição, caso houver necessidade em Consultar mais de uma Operação para os mesmos produtos, é necessário criar uma Requisição para cada Operação | Cadastro de Finalidade da Operação. [Ver Seção Finalidade da Operação](#finalidade-da-operação) | Informar obrigatoriamente uma Finalidade de Operação.
+Caixa de Combinação | Característica Tributária | Campo para definir a Característica Tributária do Perfil Consultado | Cadastro de Perfil Fiscal. [Ver Seção Perfil Fiscal](#perfil-fiscal) | Informar obrigatoriamente uma Característica Tributária
+Campo | UFs de Origem/Destino | Campo para definir as UFs das quais o usuário deseja obter a tributação para a Operação definida | Campo Livre com validações | Validar a digitação do Usuário, verificando se é uma UF válida, e não permitir repetição. Limitar Preenchimento a 5 UFs. [Ver Regra R002 da Consulta em Lote](#regras-da-consulta-em-lote)
+Botão de Ação | Consultar Tributação | Botão de Ação para ativar a Consulta em Lote dos produtos selecionados conforme os parâmetros definidos pelo Usuário | Todos os dados informados | -
+Botão de Ação | Verificar Pendentes/Devolvidos | Botão para acionar a API **Envia/Recebe Dados** para verificar os Produtos alterados pela iMendes quando o cadastro de Produtos foi enviado para Saneamento ou para Consultar as Alterações Tributárias | Produtos marcados como "Enviado para Saneamento" [Ver Seção Cadastro de Produtos/Campos Necessários](#campos-necessários) | Verificar Operações Especiais para acionar a função
 
-#### Comportamento da Interface do Usuário
-Neste tópico, são descritos os Comportamentos e Interações que as Rotinas da Consulta em Lote deve realizar conforme o **Percurso realizado pelo Usuário**.
+#### Validações da Interface do Usuário
+Neste tópico, são descritos os comportamentos e interações que as Rotinas da **Consulta em Lote** devem realizar conforme as **Ações do Usuário**.
 
-Ação | Resposta | Contra Medida
+Ação | Validação | Resposta ao Usuário
 :---|:---|:---
-Consultar Produtos acima do Limite | Exibir uma Mensagem ao Usuário | Retornar à tela anterior
-Consultar Produtos sem resposta | Exibir uma Mensagem ao Usuário informando quantos produtos não foram encontrados e oferecer um meio de visualização ou impressão destes dados | Retornar à tela anterior
+Ação **Consultar Tributos** | Verificar Produtos Marcados pelo Usuário que não possuam Código de Barras GTIN, Código iMendes e que Não foram enviados para Saneamento para iMendes |  Exibir uma mensagem de confirmação informando que "Alguns produtos poderão não obter retorno de tributação", exibir a quantidade de Produtos e Salvar estes para verificação posterior.
+
+
+### Fluxo de Consulta em Lote
+![Fluxo de Consulta em Lote](./Batch-Search-Flow.jpeg)
   
 
 ### Métodos Avançados
@@ -346,3 +358,9 @@ VF 7 | Implementar mensagem de **Sugestão de Contratação da iMendes** para ca
 
 ## Relatórios Gerenciais - Logs
 Construir Relatório de Auditoria dos Produtos iMendes, para exibir o Histórico de Alterações.
+
+# Simulações
+
+## Consulta Cadastro de Produtos
+## Consulta em Lote - Regras de Entrada
+## Consulta em Lote - Regras de Saída
