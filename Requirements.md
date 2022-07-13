@@ -1,4 +1,4 @@
-# Requisitos - Integração Consulta Tributária Ganso iMendes
+# Integração Consulta Tributária iMendes
 ---
 Índice
 
@@ -16,7 +16,7 @@
     - [Requisitos da Operação](#requisitos-da-operação)
       - [Funções Necessárias](#funções-necessárias)
       - [Campos Necessários](#campos-necessários)
-      - [Tipos de Consulta](#tipos-de-consulta)
+      - [Métodos de Consulta](#métodos-de-consulta)
       - [Fluxo de Decisão do Método de Consulta](#fluxo-de-decisão-do-método-de-consulta)
       - [Composição da Tag do Emitente ```"emit"```](#composição-da-tag-do-emitente-emit)
       - [Composição da Tag Perfil ```"perfil"```](#composição-da-tag-perfil-perfil)
@@ -30,11 +30,11 @@
       - [Destino: Tabela Produto Parâmetros](#destino-tabela-produto-parâmetros)
   - [Recurso 2 - Consulta Tributos em Lote - Gerenciador de Tributação](#recurso-2---consulta-tributos-em-lote---gerenciador-de-tributação)
     - [Regras da Consulta em Lote](#regras-da-consulta-em-lote)
-    - [Métodos Padrão](#métodos-padrão)
-      - [Interface do Usuário](#interface-do-usuário)
-      - [Composições da Consulta em Lote](#composições-da-consulta-em-lote)
-    - [Fluxo de Consulta em Lote](#fluxo-de-consulta-em-lote)
-    - [Métodos Avançados](#métodos-avançados)
+    - [Requisitos da Operação](#requisitos-da-operação-1)
+      - [Funções Necessárias](#funções-necessárias-1)
+      - [Validações da Consulta em Lote](#validações-da-consulta-em-lote)
+      - [Fluxo de Consulta em Lote](#fluxo-de-consulta-em-lote)
+      - [Funções Avançadas](#funções-avançadas)
       - [Consulta Produtos Pendentes ou Devolvidos](#consulta-produtos-pendentes-ou-devolvidos)
       - [Remover Produtos da Base iMendes](#remover-produtos-da-base-imendes)
   - [Controle de Acesso e Acessos Restritos](#controle-de-acesso-e-acessos-restritos)
@@ -161,7 +161,7 @@ Tipo | Posicionamento | Nome/Texto | Descritivo | Validações
 **Campo** | A Definir |Enviado para Saneamento| Campo para armazenar e exibir a informação quando o Produto foi enviado para a iMendes classificar e tributar. Será utilizado para identificar que produtos estão pendentes de tributação na iMendes, e como *flag* para apontar que precisa receber atualização. Complementar esta informação com a Data e Hora do envio | Somente leitura e visualmente destacado
 **Caixa de Seleção** | A Definir | **Não tributar pelo iMendes** | Parâmetro para restringir a atualização de Tributos do Produto pelo iMendes. Por decisão do Usuário, alguns produtos podem ser tributados seguindo a sua própria interpretação. | Solicitar Acesso Restrito para ativar e desativar o parâmetro.
 
-#### Tipos de Consulta
+#### Métodos de Consulta
 Além dos campos e funções, é necessário criar Métodos de Consulta que trata o **Comportamento do Usuário** e direciona a Consulta para o fluxo correto de consumo das APIs. Todos os métodos são requeridos, e a API retorna informações distintas conforme método utilizado que são:
 
 Método | Tipo de Consulta | Descritivo | Validações | API a Consumir | Tags de Envio Principais
@@ -307,11 +307,11 @@ R001 | Limitação de Quantidade de Produtos em Lote | 1000 | 100 | Limitar o En
 R002 | Limitação de Quantidade de UFs de Envio | 26 | 5 | Limitar o Envio de UFs em Lote por Consulta
 R003 | Limitação de Tempo de Resposta da API | 5 min. | 3 min. | Limitar o Tempo de Resposta para efetuar nova Consulta
 
-### Métodos Padrão
+### Requisitos da Operação
 A integração iMendes oferece opção para usuário consultar a tributação de vários produtos em uma única requisição, observando as limitações da API e Regras definidas. Para que o recurso seja oferecido ao usuário, é necessário criar uma **Tela de Consulta em Lotes** que processará os Produtos selecionados pelo Usuário, conforme especificações a seguir.
 
-#### Interface do Usuário
-Os elementos necessários em uma interface de consulta em lote são:
+#### Funções Necessárias
+A Consulta em Lote requer a criação de uma Tela específica para Gerenciamento, que pode ser denominada como **Gerenciador de Tributação**, e deve conter os elementos e funções abaixo:
 
 Elemento |  Nome/Texto | Descritivo | Conjunto de dados | Validações
 :---|:---|:---|:---|:---
@@ -326,16 +326,16 @@ Campo | UFs de Origem/Destino | Campo para definir as UFs das quais o usuário d
 Botão de Ação | Consultar Tributação | Botão de Ação para ativar a Consulta em Lote dos produtos selecionados conforme os parâmetros definidos pelo Usuário | Todos os dados informados | -
 Botão de Ação | Verificar Pendentes/Devolvidos | Botão para acionar a API **Envia/Recebe Dados** para verificar os Produtos alterados pela iMendes quando o cadastro de Produtos foi enviado para Saneamento ou para Consultar as Alterações Tributárias | Produtos marcados como "Enviado para Saneamento" [Ver Seção Cadastro de Produtos/Campos Necessários](#campos-necessários) | Verificar Operações Especiais para acionar a função
 
-#### Composições da Consulta em Lote
-Neste tópico, são descritos as composições de parâmetros e validações necessárias que a **Consulta em Lote** deve realizar conforme as **Ações do Usuário**.
+#### Validações da Consulta em Lote
+O comportamento do Usuário é diversificado e algumas validações são necessárias para as **Ações específicas** abaixo:
 
-Composição | Validação | Resposta ao Usuário | Dados da Composição | Tags Principais
+Ação | Validação | Resposta ao Usuário | Dados da Composição | Tags Principais
 :---|:---|:---|:---|:---
 Se Informar uma Finalidade de Operação do Tipo **Entrada** ou **Saída** e no campo UFs informar a UF da Empresa Filial e Outras UFs | Gerar uma Requisição específica para a UF da Empresa Filial e uma Específica para as demais UFs | Informar que serão geradas duas requisições distintas para API, e que os dados recebidos serão agrupados por UF | Utilizar o CFOP Estadual da Finalidade da Operação para a Requisição da UF da Empresa e o CFOP Interestadual para as demais UFs. Ler a Finalidade do Produto informada na Finalidade da Operação para compor a consulta | ```"perfil/uf"```, ```"perfil/cfop"```, ```"perfil/finalidade"```
-Se Filtrar e Selecionar Produtos que requerem [Métodos de Consulta](#tipos-de-consulta) distintos | Tratar cada situação distinta para assegurar que a consulta seja realizada utilizando a API correta | Informar ao Usuário que determinados Produtos poderão ser consultados por meios distintos e que o mesmo deverá processar individualmente cada situação | Código iMendes, Enviado para Saneamento | ```"produtos/codigo"```, ```"produtos/codInterno"```, ```"produtos/codImendes"```
+Se Filtrar e Selecionar Produtos que requerem [Métodos de Consulta](#métodos-de-consulta) distintos | Tratar cada situação distinta para assegurar que a consulta seja realizada utilizando a API correta | Informar ao Usuário que determinados Produtos poderão ser consultados por meios distintos e que o mesmo deverá processar individualmente cada situação | Código iMendes, Enviado para Saneamento | ```"produtos/codigo"```, ```"produtos/codInterno"```, ```"produtos/codImendes"```
 
 
-### Fluxo de Consulta em Lote
+#### Fluxo de Consulta em Lote
 ![Fluxo de Consulta em Lote](./Batch-Search-Flow.jpeg)
 
 [Voltar ao Sumário](#sumario)
@@ -343,7 +343,9 @@ Se Filtrar e Selecionar Produtos que requerem [Métodos de Consulta](#tipos-de-c
 [Voltar ao Resumo](#resumo)
   
 
-### Métodos Avançados
+#### Funções Avançadas
+- Verificação de Produtos revisados pela iMendes - Método Alterados
+- Remoção de Produtos revisados pela iMendes - Método Remove Devolvidos
 #### Consulta Produtos Pendentes ou Devolvidos
 #### Remover Produtos da Base iMendes
 
