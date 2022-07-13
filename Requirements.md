@@ -23,8 +23,8 @@
       - [Composição da Tag de Produtos ```"produtos"```](#composição-da-tag-de-produtos-produtos)
       - [Composição da Requisição - Resumo da Operação de Consulta](#composição-da-requisição---resumo-da-operação-de-consulta)
   - [Captura do Retorno das Informações](#captura-do-retorno-das-informações)
-    - [Histórico de Consultas](#histórico-de-consultas)
-      - [Atualizações Tributárias - Exibição de Dados](#atualizações-tributárias---exibição-de-dados)
+    - [Gravação de Histórico de Consultas](#gravação-de-histórico-de-consultas)
+      - [Tela de Exibição do Retorno da Consulta](#tela-de-exibição-do-retorno-da-consulta)
     - [Relacionamento de Dados - Retorno iMendes x Ganso](#relacionamento-de-dados---retorno-imendes-x-ganso)
       - [Destino: Tabela Produto](#destino-tabela-produto)
       - [Destino: Tabela Produto Parâmetros](#destino-tabela-produto-parâmetros)
@@ -230,9 +230,9 @@ Após a obtenção dos Dados Necessários para envio da Requisição, o **Fluxo 
 [Voltar ao Resumo](#resumo)
 
 ## Captura do Retorno das Informações
-Após efetuar a Consulta e obter o retorno com os Dados Tributários, é necessário efetuar a Gravação de Histórico de Consulta. Abaixo são descritos quais são necessários:
+Após efetuar a Consulta e obter o retorno com os Dados Tributários, é necessário efetuar a Gravação do Histórico de Consultas. Abaixo são descritos quais são necessários:
 
-### Histórico de Consultas
+### Gravação de Histórico de Consultas
 Nome do Histórico | Descritivo | Dados Principais
 :----|:-----|:----
 Consumo da API | Armanezenar todas as Consultas Realizadas por Usuário | Usuário, Data e Hora, CNPJ, Método de Consulta e Produtos Consultados
@@ -240,17 +240,17 @@ Retorno de Consulta | Armazenar os Retornos de cada Produto Consultado | Código
 Alterações de Produtos | Armazenar as Alterações Tributárias Promovidas pela iMendes relacionadas aos Produtos do Usuário | Código do Produto, Data e Hora, Dados Alterados para Consumo 
 Dados Ignorados| Armazenar os Campos e Dados que foram ignorados pelo Usuário durante a Confirmação de Retorno | Armazenar por Produto e Usuário, Todos os campos e dados não selecionados pelo Usuário
 
-Após captura e armazenamento dos dados consultados, um dos Requisitos para Homologação descreve que o Usuário precisa ter liberdade em **Aceitar** as atualizações Tributárias para o Produto total ou parcial, para gravá-las no Cadastro do Produto Consultado. Deste modo, é necessário exibir em Tela este retorno contendo todos os Dados **Antes e Depois**, destacando claramente quais apresentam divergências. Os elementos necessários nesta exibição estão descritas abaixo:
+#### Tela de Exibição do Retorno da Consulta
+Após captura e armazenamento dos dados consultados, um dos **Requisitos para Homologação** descreve que o Usuário deve ter liberdade em **Aceitar** as atualizações Tributárias para o Produto, total ou parcial, para que sejam então gravadas no Cadastro do Produto Consultado. Deste modo, é necessário exibir em Tela este retorno contendo todos os Dados **Antes e Depois**, destacando claramente quais apresentam diferenças. Os elementos necessários nesta exibição são:
 
-#### Atualizações Tributárias - Exibição de Dados
 Campo | Informação de exibição | Validações
 :---|:---|:---
 Código Interno | Código do Produto Ganso | Somente Leitura
 Descrição | Descrição do Produto Ganso | Somente Leitura
 Código de Barras | GTIN/EAN do Produto Consultado | Somente Leitura
 Código iMendes | Código iMendes Vinculado ao Produto Consultado | Somente Leitura
-Grade de Dados "Tributação Atual" | Exibir todos os campos relacionados em [Destino: Produtos](#destino-tabela-produto) e [Destino: Produto Parâmetros](#destino-tabela-produto-parâmetros) com informações atuais gravadas no Produto no Sistema Ganso | Somente Leitura
-Grade de Dados "Tributação Nova"| Exibir todos os campos relacionados em [Destino: Produtos](#destino-tabela-produto) e [Destino: Produto Parâmetros](#destino-tabela-produto-parâmetros) com informações **que a Consulta à API retornou** | Opção para Selecionar individualmente cada campo
+Grade de Dados "Tributação Atual" | Exibir todos os campos relacionados em [Destino: Produtos](#destino-tabela-produto) e [Destino: Produto Parâmetros](#destino-tabela-produto-parâmetros) com informações atuais (antes de atualizar) gravadas no Produto no Sistema Ganso | Somente Leitura
+Grade de Dados "Tributação Nova"| Exibir todos os campos relacionados em [Destino: Produtos](#destino-tabela-produto) e [Destino: Produto Parâmetros](#destino-tabela-produto-parâmetros) com as informações **que a Consulta à API retornou** para que o Usuário entenda quais serão as mudanças | Opção para Selecionar individualmente cada campo
 Botão de Confirmação | Exibir uma Caixa de Diálogo com texto de confirmação de alteração de dados. Havendo campos parciais, incluí-los na mensagem para deixar claro ao usuário as alterações que serão realizadas | Solicitar Acesso Restrito para Gravar todos os Dados ou Dados Parciais
 
 Abaixo estão descritas as informações Retornadas por Grupo e qual o destino da mesma no Sistema Ganso.
